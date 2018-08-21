@@ -34,6 +34,8 @@ contract('Bounty', ([owner, alice, bob]) => {
     await bounty.createBounty(1, 3, {from: alice});
     await bounty.createSubmission.call(1, 2, {from: bob});
     await bounty.createSubmission(1, 2, {from: bob});
+    const response = await bounty.acceptSubmission.call(2, {from: alice});
+    assert.equal(true, response);
     await bounty.acceptSubmission(2, {from: alice});
   });
 
