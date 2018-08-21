@@ -6,11 +6,6 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     bounty = await Bounty.new();
   });
 
-  //it('creates bounty', async () => {
-  //  console.log(owner);
-  //  await bounty.createBounty.call(1, 1, {from: owner});
-  //});
-
   it('creates bounty', async () => {
     await bounty.createBounty(1, 1, {from: alice});
     const response = await bounty.listMyBounties.call({from: alice});
