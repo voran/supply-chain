@@ -30,6 +30,13 @@ contract('Bounty', ([owner, alice, bob]) => {
     assert.equal(response[0], 1);
   });
 
+  it('accepts submission', async () => {
+    await bounty.createBounty(1, 3, {from: alice});
+    await bounty.createSubmission.call(1, 2, {from: bob});
+    await bounty.createSubmission(1, 2, {from: bob});
+    await bounty.acceptSubmission(2, {from: alice});
+  });
+
   it('lists submissions when none', async () => {
     const response = await bounty.listMySubmissions.call({from: alice});
     assert.equal(response.length, 0);

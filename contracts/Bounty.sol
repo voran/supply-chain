@@ -37,20 +37,13 @@ contract Bounty {
   // check if uint has default value
   modifier defaultValue(uint _hash) { assert(_hash == 0); _;}
 
-  function createBounty(uint hash, uint amount) public returns (bool) {
+  function createBounty(uint hash, uint amount) public {
     // make sure a bounty with this hash does not exist
     require(bountyAmounts[hash] == 0);
 
-    // escrow the bounty amount
-    token.approve(address(this), amount);
-    bool status = token.transfer(address(this), amount);
-
-    if (status) {
-      bounties[msg.sender].push(hash);
-      bountyToOwnerMap[hash] = msg.sender;
-      bountyAmounts[hash] = amount;
-    }
-    return status;
+    bounties[msg.sender].push(hash);
+    bountyToOwnerMap[hash] = msg.sender;
+    bountyAmounts[hash] = amount;
   }
 
   function createSubmission(uint bountyHash, uint submissionHash) public
@@ -76,11 +69,12 @@ contract Bounty {
     acceptedSubmission = bountyToAcceptedSubmissionMap[bountyHash];
   }
 
-  function acceptSubmission(uint submissionHash) public nonDefaultValue(submissionHash) defaultValue(bountyToAcceptedSubmissionMap[bountyHash]) {
+  function acceptSubmission(uint submissionHash) public nonDefaultValue(submissionHash) defaultValue(bountyToAcceptedSubmissionMap[bountyHash]) returns (bool) {
     uint bountyHash = submissionToBountyMap[submissionHash];
 
     bountyToAcceptedSubmissionMap[bountyHash] = submissionHash;
 
-    token.delegatecall(bytes4(sha3("transfer(address _to, uint256 _value)")), submissionToSubmitterMap[submissionHash], bountyAmounts[bountyHash]);
+    token.approve(submissionToSubmitterMap[submissionHash], bountyAmounts[bountyHash]);
+    return token.transfer(submissionToSubmitterMap[submissionHash], bountyAmounts[bountyHash]);
   }
 }
