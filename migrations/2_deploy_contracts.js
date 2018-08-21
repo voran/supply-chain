@@ -1,5 +1,5 @@
-const SupplyChain = artifacts.require('./SupplyChain.sol');
+const Bounty = artifacts.require('./Bounty.sol');
 
 module.exports = (deployer) => {
-  deployer.deploy(SupplyChain);
+  deployer.deploy(Bounty);
 };
