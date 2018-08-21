@@ -3,7 +3,6 @@ pragma solidity ^0.4.23;
 import "tokens/contracts/eip20/EIP20.sol";
 
 contract Bounty {
-  address public owner;
   EIP20 token;
 
   string constant tokenName = "Bounty Token";
@@ -29,7 +28,6 @@ contract Bounty {
   mapping (uint => uint) public bountyToAcceptedSubmissionMap;
 
   constructor() public {
-    owner = msg.sender;
     token = new EIP20(tokenAmount, tokenName, tokenDecimals, tokenSymbol);
   }
 
@@ -39,14 +37,20 @@ contract Bounty {
   // check if uint has default value
   modifier defaultValue(uint _hash) { assert(_hash == 0); _;}
 
-  function createBounty(uint hash, uint amount) public defaultValue(bountyAmounts[hash]) {
+  function createBounty(uint hash, uint amount) public returns (bool) {
+    // make sure a bounty with this hash does not exist
+    require(bountyAmounts[hash] == 0);
 
     // escrow the bounty amount
-    require(token.transferFrom(msg.sender, this, amount));
+    token.approve(address(this), amount);
+    bool status = token.transfer(address(this), amount);
 
-    bounties[msg.sender].push(hash);
-    bountyToOwnerMap[hash] = msg.sender;
-    bountyAmounts[hash] = amount;
+    if (status) {
+      bounties[msg.sender].push(hash);
+      bountyToOwnerMap[hash] = msg.sender;
+      bountyAmounts[hash] = amount;
+    }
+    return status;
   }
 
   function createSubmission(uint bountyHash, uint submissionHash) public
@@ -62,7 +66,7 @@ contract Bounty {
     return bounties[msg.sender];
   }
 
-  function listMySubmission() public view returns (uint[]) {
+  function listMySubmissions() public view returns (uint[]) {
     return submissions[msg.sender];
   }
 
@@ -77,6 +81,6 @@ contract Bounty {
 
     bountyToAcceptedSubmissionMap[bountyHash] = submissionHash;
 
-    require(token.transferFrom(this, submissionToSubmitterMap[submissionHash], bountyAmounts[bountyHash]));
+    token.delegatecall(bytes4(sha3("transfer(address _to, uint256 _value)")), submissionToSubmitterMap[submissionHash], bountyAmounts[bountyHash]);
   }
 }
