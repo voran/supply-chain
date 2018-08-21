@@ -37,6 +37,8 @@ contract Bounty {
   // check if uint has default value
   modifier defaultValue(uint _hash) { assert(_hash == 0); _;}
 
+  modifier bountyOwner(uint bountyHash) { require(bountyToOwnerMap[bountyHash] == msg.sender); _;}
+
   function createBounty(uint hash, uint amount) public {
     // make sure a bounty with this hash does not exist
     require(bountyAmounts[hash] == 0);
@@ -63,10 +65,12 @@ contract Bounty {
     return submissions[msg.sender];
   }
 
-  function listBountySubmissions(uint bountyHash) public view returns (uint[] allSubmission, uint acceptedSubmission) {
-    require(bountyToOwnerMap[bountyHash] == msg.sender);
-    allSubmission = submissions[msg.sender];
-    acceptedSubmission = bountyToAcceptedSubmissionMap[bountyHash];
+  function listBountySubmissions(uint bountyHash) public view bountyOwner(bountyHash) returns (uint[]) {
+    return bountyToSubmissionsMap[bountyHash];
+  }
+
+  function getBountyAcceptedSubmission(uint bountyHash) public view bountyOwner(bountyHash) returns (uint) {
+    return bountyToAcceptedSubmissionMap[bountyHash];
   }
 
   function acceptSubmission(uint submissionHash) public nonDefaultValue(submissionHash) defaultValue(bountyToAcceptedSubmissionMap[bountyHash]) returns (bool) {
