@@ -71,10 +71,11 @@ contract Bounty {
 
   function acceptSubmission(uint submissionHash) public nonDefaultValue(submissionHash) defaultValue(bountyToAcceptedSubmissionMap[bountyHash]) returns (bool) {
     uint bountyHash = submissionToBountyMap[submissionHash];
-
+    uint bountyAmount = bountyAmounts[bountyHash];
+    address submitterAddress = submissionToSubmitterMap[submissionHash];
     bountyToAcceptedSubmissionMap[bountyHash] = submissionHash;
 
-    token.approve(submissionToSubmitterMap[submissionHash], bountyAmounts[bountyHash]);
-    return token.transfer(submissionToSubmitterMap[submissionHash], bountyAmounts[bountyHash]);
+    token.approve(submitterAddress, bountyAmount);
+    return token.transfer(submitterAddress, bountyAmount);
   }
 }
