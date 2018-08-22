@@ -54,6 +54,20 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     assert.equal(err.message, revertMessage);
   });
 
+  it('does not create bounty if same id exists', async () => {
+    const bountyAmount = 10;
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    let err;
+    try {
+      await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
   it('does not create bounty on insufficient balance', async () => {
     const bountyAmount = 200;
 
@@ -68,36 +82,11 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     assert.equal(err.message, revertMessage);
   });
 
-  it('does not create bounty on zero hash', async () => {
-    const bountyAmount = 2;
-
+  it('does not create submission if same id exists', async () => {
+    await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
     let err;
     try {
-      await bounty.createBounty(0, bountyAmount, {from: alice});
-    } catch (error) {
-      err = error;
-    }
-
-    assert.ok(err instanceof Error);
-    assert.equal(err.message, revertMessage);
-  });
-
-  it('does not create submission on zero hash for bounty', async () => {
-    let err;
-    try {
-      await bounty.createSubmission(0, bobSubmissionId, {from: bob});
-    } catch (error) {
-      err = error;
-    }
-
-    assert.ok(err instanceof Error);
-    assert.equal(err.message, revertMessage);
-  });
-
-  it('does not create submission on zero hash for submission', async () => {
-    let err;
-    try {
-      await bounty.createSubmission(bountyId, 0, {from: bob});
+      await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
     } catch (error) {
       err = error;
     }

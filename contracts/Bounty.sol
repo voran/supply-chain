@@ -41,7 +41,7 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   * @param bountyId bounty id.
   * @param amount bounty amount.
   */
-  function createBounty(bytes32 bountyId, uint amount) public nonEmpty(bountyId) nonZero(amount) {
+  function createBounty(bytes32 bountyId, uint amount) public nonZero(amount) {
     require(bounties[bountyId].owner == 0x0);
     bountyIds.push(bountyId);
     bounties[bountyId].owner = msg.sender;
@@ -55,8 +55,7 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   * @param bountyId id of bounty.
   * @param submissionId id of submission.
   */
-  function createSubmission(bytes32 bountyId, bytes32 submissionId) public
-    nonEmpty(bountyId) nonEmpty(submissionId) {
+  function createSubmission(bytes32 bountyId, bytes32 submissionId) public {
 
     require(submissions[submissionId].owner == 0x0);
 
@@ -79,8 +78,7 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   /** @dev Lists all submissions for a given bounty.
   * @return list of submission ids.
   */
-  function listBountySubmissions(bytes32 bountyId) public view
-    nonEmpty(bountyId) returns (bytes32[]) {
+  function listBountySubmissions(bytes32 bountyId) public view returns (bytes32[]) {
     return bounties[bountyId].submissionIds;
   }
 
@@ -88,8 +86,7 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   * @param bountyId id of bounty.
   * @return submission id.
   */
-  function getBountyAcceptedSubmission(bytes32 bountyId) public view
-    nonEmpty(bountyId) returns (bytes32) {
+  function getBountyAcceptedSubmission(bytes32 bountyId) public view returns (bytes32) {
     return bounties[bountyId].acceptedSubmissionId;
   }
 
@@ -98,7 +95,6 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   */
   function acceptSubmission(bytes32 submissionId) public
     bountyOwner(submissionId)
-    nonEmpty(submissionId)
     noAcceptedSubmission(submissionId)
     nonRejectedSubmission(submissionId) {
 
@@ -112,7 +108,6 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   */
   function rejectSubmission(bytes32 submissionId) public
     bountyOwner(submissionId)
-    nonEmpty(submissionId)
     noAcceptedSubmission(submissionId)
     nonRejectedSubmission(submissionId) {
 
