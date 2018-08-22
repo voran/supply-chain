@@ -57,24 +57,15 @@ App = {
 
   handleAccept: function(event) {
     event.preventDefault();
-
     var submissionId = parseInt($(event.target).data('id'));
 
-    web3.eth.getAccounts(function(error, accounts) {
-      if (error) {
-        console.log(error);
-      }
-
-      var account = accounts[0];
-
-      App.contracts.Bounty.deployed().then(function(instance) {
-        return App.withFirstAccount(function(account) {
-          return instance.acceptSubmission(submissionId, {from: account});
+    App.contracts.Bounty.deployed().then(function(instance) {
+      return App.withFirstAccount(function(account) {
+        return instance.acceptSubmission(submissionId, {from: account}).then(function(result) {
+          // todo: accepted submission
+        }).catch(function(err) {
+          console.log(err.message);
         });
-      }).then(function(result) {
-        // todo: accepted submission
-      }).catch(function(err) {
-        console.log(err.message);
       });
     });
   },
@@ -85,20 +76,12 @@ App = {
     var bountyId = 4;
     var price = 10;
 
-    web3.eth.getAccounts(function(error, accounts) {
-      if (error) {
-        console.log(error);
-      }
-
-      console.log(accounts);
-
-      App.contracts.Bounty.deployed().then(function(instance) {
-        return App.withFirstAccount(function(account) {
-          return instance.createBounty(bountyId, price, {from: accounts[0], gas: 3000000}).then(function(result) {
-            return App.getMyBounties();
-          }).catch(function(err) {
-            console.log(err.message);
-          });
+    App.contracts.Bounty.deployed().then(function(instance) {
+      return App.withFirstAccount(function(account) {
+        return instance.createBounty(bountyId, price, {from: accounts[0], gas: 3000000}).then(function(result) {
+          return App.getMyBounties();
+        }).catch(function(err) {
+          console.log(err.message);
         });
       });
     });
