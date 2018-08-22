@@ -82,7 +82,21 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     assert.equal(err.message, revertMessage);
   });
 
+  it('does not create submission if bounty does not exist', async () => {
+    let err;
+    try {
+      await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
   it('does not create submission if same id exists', async () => {
+    const bountyAmount = 2;
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
     await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
     let err;
     try {

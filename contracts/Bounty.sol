@@ -29,9 +29,6 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   event AcceptSubmission(bytes32 submissionId);
   event RejectSubmission(bytes32 submissionId);
 
-  modifier nonEmpty(bytes32 _hash) { require(_hash != 0x0000000000000000000000000000000000000000000000000000000000000000); _;}
-  modifier empty(bytes32 _hash) { require(_hash == 0x0000000000000000000000000000000000000000000000000000000000000000); _;}
-  modifier isFalse(bool _value) { require(!_value); _;}
   modifier nonZero(uint amount) { require(amount > 0); _;}
   modifier bountyOwner(bytes32 _submissionId) { require(bounties[submissions[_submissionId].bountyId].owner == msg.sender); _;}
   modifier noAcceptedSubmission(bytes32 _submissionId) { require(bounties[submissions[_submissionId].bountyId].acceptedSubmissionId == 0x0); _;}
@@ -42,7 +39,9 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   * @param amount bounty amount.
   */
   function createBounty(bytes32 bountyId, uint amount) public nonZero(amount) {
+    // bounty should not exist
     require(bounties[bountyId].owner == 0x0);
+
     bountyIds.push(bountyId);
     bounties[bountyId].owner = msg.sender;
     bounties[bountyId].amount = amount;
@@ -56,7 +55,10 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   * @param submissionId id of submission.
   */
   function createSubmission(bytes32 bountyId, bytes32 submissionId) public {
+    // bounty should exist
+    require(bounties[bountyId].owner != 0x0);
 
+    // submission should not exist
     require(submissions[submissionId].owner == 0x0);
 
     submissionIds.push(submissionId);

@@ -28,10 +28,31 @@ ipfs daemon
 ganache-cli
 truffle migrate && npm start
 ```
+Then navigate to [localhost:3000](http://localhost:3000).
 
 ## Testing
+Tests have been developed to test the happy case (create bounty -> create submission -> approve submission), as well as different boundary conditions and failure scenarios, including:
+* Trying to create a bounty with an already existing id
+* Trying to create a submission for an already existing submission
+* Trying to create a submission for a non-existent bounty.
+* Trying to accept/reject a submission for a bounty you don't own.
+* Trying to accept/reject a submission which is already accepted/rejected.
+* Trying to accept/reject a submission when the bounty already has an accepted submission.
+
 ```
 truffle test
 ```
 
-Then navigate to [localhost:3000](http://localhost:3000).
+## TODO
+### Design Patterns
+* Implement Emergency Stop
+* A document called design_pattern_desicions.md that explains why you chose to use the design patterns that you did.
+
+
+
+### Security Tools / Common Attacks
+* A document called avoiding_common_attacks.md that explains what measures you took to ensure that your contracts are not susceptible to common attacks. (Module 9 Lesson 3)
+
+
+## Stretch Requirements Fulfilled
+* Used IPFS
