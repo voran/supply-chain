@@ -24,12 +24,18 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   mapping (bytes32 => Bounty) public bounties;
   mapping (bytes32 => Submission) public submissions;
 
+  event CreateBounty(bytes32 bountyId, address owner, uint amount);
+  event CreateSubmission(bytes32 submissionId, bytes32 bountyId, address owner);
+  event AcceptSubmission(bytes32 submissionId);
+  event RejectSubmission(bytes32 submissionId);
 
   modifier nonEmpty(bytes32 _hash) { require(_hash != 0x0000000000000000000000000000000000000000000000000000000000000000); _;}
   modifier empty(bytes32 _hash) { require(_hash == 0x0000000000000000000000000000000000000000000000000000000000000000); _;}
   modifier isFalse(bool _value) { require(!_value); _;}
   modifier nonZero(uint amount) { require(amount > 0); _;}
-
+  modifier bountyOwner(bytes32 _submissionId) { require(bounties[submissions[_submissionId].bountyId].owner == msg.sender); _;}
+  modifier noAcceptedSubmission(bytes32 _submissionId) { require(bounties[submissions[_submissionId].bountyId].acceptedSubmissionId == 0x0); _;}
+  modifier nonRejectedSubmission(bytes32 _submissionId) { require(submissions[_submissionId].rejected == false); _;}
 
   /** @dev Creates a bounty and escrows bounty amount from contract.
   * @param bountyId bounty id.
@@ -41,6 +47,8 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
     bounties[bountyId].owner = msg.sender;
     bounties[bountyId].amount = amount;
     transfer(this, amount);
+
+    emit CreateBounty(bountyId, msg.sender, amount);
   }
 
   /** @dev Creates a submission for a bounty.
@@ -57,6 +65,8 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
     submissions[submissionId].bountyId = bountyId;
 
     bounties[bountyId].submissionIds.push(submissionId);
+
+    emit CreateSubmission(submissionId, bountyId, msg.sender);
   }
 
   /** @dev Lists all bounties.
@@ -87,25 +97,26 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   * @param submissionId id of submission.
   */
   function acceptSubmission(bytes32 submissionId) public
+    bountyOwner(submissionId)
     nonEmpty(submissionId)
-    empty(bounties[submissions[submissionId].bountyId].acceptedSubmissionId)
-    isFalse(submissions[submissionId].rejected) {
-
-    require(bounties[submissions[submissionId].bountyId].owner == msg.sender);
+    noAcceptedSubmission(submissionId)
+    nonRejectedSubmission(submissionId) {
 
     bounties[submissions[submissionId].bountyId].acceptedSubmissionId = submissionId;
     this.transfer(submissions[submissionId].owner, bounties[submissions[submissionId].bountyId].amount);
+    emit AcceptSubmission(submissionId);
   }
 
   /** @dev Rejects a given submission.
   * @param submissionId id of submission.
   */
   function rejectSubmission(bytes32 submissionId) public
+    bountyOwner(submissionId)
     nonEmpty(submissionId)
-    empty(bounties[submissions[submissionId].bountyId].acceptedSubmissionId)
-    isFalse(submissions[submissionId].rejected) {
+    noAcceptedSubmission(submissionId)
+    nonRejectedSubmission(submissionId) {
 
-    require(bounties[submissions[submissionId].bountyId].owner == msg.sender);
     submissions[submissionId].rejected = true;
+    emit RejectSubmission(submissionId);
   }
 }
