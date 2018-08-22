@@ -169,15 +169,23 @@ App = {
 
         App.contracts.Bounty.deployed().then(function(instance) {
           return App.withFirstAccount(function(account) {
-            return instance.listBountySubmissions.call(bountyId, {from: account}).then(function(results) {
-              submissionRow.html('');
-              instance.listMySubmissions.call({from: account}).then(function(submissions) {
-                for (i = 0; i < submissions.length; i ++) {
-                  submissionTemplate.find('.submission-id').html(submissions[i]);
-                  submissionTemplate.find('.btn').attr('data-id', submissions[i]);
+            return instance.getBountyAcceptedSubmission.call(bountyId, {from: account}).then(function(acceptedSubmission) {
+              return instance.listBountySubmissions.call(bountyId, {from: account}).then(function(results) {
+                submissionRow.html('');
+                instance.listMySubmissions.call({from: account}).then(function(submissions) {
+                  for (i = 0; i < submissions.length; i ++) {
+                    if (acceptedSubmission != '0x0000000000000000000000000000000000000000000000000000000000000000') {
+                      submissionTemplate.find('.btn-accept-submission').hide();
+                      submissionTemplate.find('.btn-reject-submission').hide();
+                    } else if (acceptedSubmission == submissions[i]) {
+                      submissionTemplate.removeClass('.hidden');
+                    }
+                    submissionTemplate.find('.submission-id').html(submissions[i]);
+                    submissionTemplate.find('.btn').attr('data-id', submissions[i]);
 
-                  submissionRow.append(submissionTemplate.html());
-                }
+                    submissionRow.append(submissionTemplate.html());
+                  }
+                });
               });
             });
           });

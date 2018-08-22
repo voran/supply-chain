@@ -24,19 +24,16 @@
           <h1 class="text-center">Bounty List</h1>
         </div>
       </div>
-      <h3> My Bounties</h3>
+      <h3 clearfix> My Bounties
+        <div class="pull-right">
+          <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#addBountyModal"><span class="glyphicon glyphicon-plus"></span> Add Bounty</button>
+        </div>
+      </h3>
       <hr/>
-      <div id="bountyRow" class="row">
-        <!-- PETS LOAD HERE -->
-      </div>
+      <div id="bountyRow" class="row"></div>
       <h3> My Submissions</h3>
       <hr/>
-      <div id="submissionRow" class="row">
-        <!-- PETS LOAD HERE -->
-      </div>
-      <div class="row text-center">
-        <button class="btn btn-lg btn-primary" type="button" data-toggle="modal" data-target="#addBountyModal"><span class="glyphicon glyphicon-plus"></span> Add Bounty</button>
-      </div>
+      <div id="submissionRow" class="row"></div>
     </div>
 
     <div id="bountyTemplate" style="display: none;">
@@ -161,15 +158,15 @@
             <div id="submissionTable"></div>
             <div id="submissionRowTemplate" style="display: none">
               <div class="row">
-                <div class="col-md-8 submission-id text-small" style="overflow: hidden; text-overflow:ellipsis;"></div>
+                <div class="col-md-8 submission-id text-small" style="overflow: hidden; text-overflow:ellipsis;"><span class="label label-sm label-success hidden">Accepted</span></h3></div>
                 <div class="col-md-4 clearfux">
                   <button class="btn btn-sm btn-default btn-download-submission" type="button">
                     <span class="glyphicon glyphicon-download"></span> Download
                   </button>
-                  <button class="btn btn-sm btn-primary btn-approve-submission" type="button">
-                    <span class="glyphicon glyphicon-ok"></span> Approve
+                  <button class="btn btn-sm btn-primary btn-accept-submission" type="button">
+                    <span class="glyphicon glyphicon-ok"></span> Accept
                   </button>
-                  <button class="btn btn-sm btn-danger btn-approve-submission" type="button">
+                  <button class="btn btn-sm btn-danger btn-reject-submission" type="button">
                     <span class="glyphicon glyphicon-remove"></span> Reject
                   </button>
                 </div>
