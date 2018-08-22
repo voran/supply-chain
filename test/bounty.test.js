@@ -269,7 +269,7 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
 
     const listResponse = await bounty.listBountyRejectedSubmissions.call(bountyId, {from: alice});
     assert.equal(1, listResponse.length);
-    assert.equal(bobSubmissionId, listResponse[0]); // bob's submission
+    assert.equal(bobSubmissionId, listResponse[0]);
   });
 
   it('does not reject submission when not bounty owner', async () => {

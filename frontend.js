@@ -140,6 +140,7 @@ App = {
         return App.withFirstAccount(function(account) {
           var bountyId = App.bytes32FromHash(res[0].hash);
           return instance.createBounty(bountyId, parseInt(data.amount), {from: account, gas: 3000000}).then(function(result) {
+            $('#addBountyModal').modal('hide');
             return App.getMyBounties();
           }).catch(function(err) {
             console.log(err.message);
@@ -175,21 +176,35 @@ App = {
       return App.withFirstAccount(function(account) {
         return instance.getBountyAcceptedSubmission.call(bountyId, {from: account}).then(function(acceptedSubmission) {
           return instance.listBountySubmissions.call(bountyId, {from: account}).then(function(results) {
-            submissionRow.html('');
-            instance.listMySubmissions.call({from: account}).then(function(submissions) {
-              for (i = 0; i < submissions.length; i ++) {
-                if (acceptedSubmission != '0x0000000000000000000000000000000000000000000000000000000000000000') {
-                  submissionTemplate.find('.btn-accept-submission').hide();
-                  submissionTemplate.find('.btn-reject-submission').hide();
-                } else if (acceptedSubmission == submissions[i]) {
-                  submissionTemplate.removeClass('.hidden');
-                }
-                submissionTemplate.find('.submission-id').html(submissions[i]);
-                submissionTemplate.find('.btn').attr('data-bounty-id', bountyId);
-                submissionTemplate.find('.btn').attr('data-id', submissions[i]);
+            return instance.listBountyRejectedSubmissions.call(bountyId, {from: account}).then(function(rejectedSubmissions) {
+              submissionRow.html('');
+              instance.listMySubmissions.call({from: account}).then(function(submissions) {
+                for (i = 0; i < submissions.length; i ++) {
+                  submissionTemplate.find('.label-success').addClass('hidden');
+                  submissionTemplate.find('.label-danger').addClass('hidden');
+                  submissionTemplate.find('.btn-accept-submission').removeClass('hidden');
+                  submissionTemplate.find('.btn-reject-submission').removeClass('hidden');
+                  if (acceptedSubmission != '0x0000000000000000000000000000000000000000000000000000000000000000') {
+                    submissionTemplate.find('.btn-accept-submission').addClass('hidden');
+                    submissionTemplate.find('.btn-reject-submission').addClass('hidden');
+                  }
+                  
+                  if (acceptedSubmission == submissions[i]) {
+                    submissionTemplate.find('.label-success').removeClass('hidden');
+                  }
 
-                submissionRow.append(submissionTemplate.html());
-              }
+                  if (rejectedSubmissions.indexOf(submissions[i]) != -1) {
+                    submissionTemplate.find('.label-danger').removeClass('hidden');
+                    submissionTemplate.find('.btn-accept-submission').addClass('hidden');
+                    submissionTemplate.find('.btn-reject-submission').addClass('hidden');
+                  }
+                  submissionTemplate.find('.submission-id').html(submissions[i]);
+                  submissionTemplate.find('.btn').attr('data-bounty-id', bountyId);
+                  submissionTemplate.find('.btn').attr('data-id', submissions[i]);
+
+                  submissionRow.append(submissionTemplate.html());
+                }
+              });
             });
           });
         });
@@ -199,7 +214,7 @@ App = {
 
   handleGetBountyDetails: function(e) {
     e.preventDefault();
-    var bountyId = $(e.target).data('id');
+    var bountyId = $(e.target).attr('data-id');
 
     App.ipfs.files.cat(App.hashFromBytes32(bountyId), function(err, res) {
       if (err) {
