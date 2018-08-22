@@ -2,13 +2,7 @@ pragma solidity ^0.4.23;
 
 import "tokens/contracts/eip20/EIP20.sol";
 
-contract Bounty {
-  EIP20 token;
-
-  string constant tokenName = "Bounty Token";
-  uint8 constant tokenDecimals = 18;
-  uint256 constant tokenAmount =  1000000 * 10**uint(tokenDecimals);
-  string constant tokenSymbol = "BTY";
+contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
 
   // bounty owner -> bounty hashes
   mapping (address => uint[]) public bounties;
@@ -26,10 +20,6 @@ contract Bounty {
   mapping (uint => uint[]) public bountyToSubmissionsMap;
   // bounty hash -> accepted submission hash
   mapping (uint => uint) public bountyToAcceptedSubmissionMap;
-
-  constructor() public {
-    token = new EIP20(tokenAmount, tokenName, tokenDecimals, tokenSymbol);
-  }
 
   // check if uint has non-default value
   modifier nonDefaultValue(uint _hash) { assert(_hash > 0); _;}
@@ -75,11 +65,11 @@ contract Bounty {
 
   function acceptSubmission(uint submissionHash) public nonDefaultValue(submissionHash) defaultValue(bountyToAcceptedSubmissionMap[bountyHash]) returns (bool) {
     uint bountyHash = submissionToBountyMap[submissionHash];
-    uint bountyAmount = bountyAmounts[bountyHash];
+    uint256 bountyAmount = bountyAmounts[bountyHash];
     address submitterAddress = submissionToSubmitterMap[submissionHash];
     bountyToAcceptedSubmissionMap[bountyHash] = submissionHash;
 
-    token.approve(submitterAddress, bountyAmount);
-    return token.transfer(submitterAddress, bountyAmount);
+    approve(submitterAddress, bountyAmount);
+    return transfer(submitterAddress, bountyAmount);
   }
 }
