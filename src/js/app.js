@@ -37,8 +37,8 @@ App = {
   },
 
   getMyBounties: function() {
-    var bountyRow = $('#petsRow');
-    var bountyTemplate = $('#petTemplate');
+    var bountyRow = $('#bountyRow');
+    var bountyTemplate = $('#bountyTemplate');
     console.log('called getMyBounties');
     App.contracts.Bounty.deployed().then(function(instance) {
       return App.withFirstAccount(function(account) {
