@@ -39,6 +39,8 @@ App = {
   bindEvents: function() {
     $('#addBountyForm').on('submit', App.handleAddBounty);
     $(document).on('click', '.btn-bounty-details', App.handleGetBountyDetails);
+    $(document).on('click', '.btn-add-submission', App.handleAddSubmissionClicked);
+    $('#addSubmissionForm').on('submit', App.handleAddSubmission);
   },
 
   initContract: function() {
@@ -52,7 +54,6 @@ App = {
   getMyBounties: function() {
     var bountyRow = $('#bountyRow');
     var bountyTemplate = $('#bountyTemplate');
-    console.log('called getMyBounties');
     App.contracts.Bounty.deployed().then(function(instance) {
       return App.withFirstAccount(function(account) {
         bountyRow.html('');
@@ -90,7 +91,6 @@ App = {
       return obj;
     }, {});
 
-    console.log(JSON.stringify(data));
     App.ipfs.files.add(window.IpfsApi().Buffer.from(JSON.stringify(data)), function(err, res) {
       if (err) {
         console.log(err);
@@ -98,10 +98,8 @@ App = {
       }
       App.contracts.Bounty.deployed().then(function(instance) {
         return App.withFirstAccount(function(account) {
-          var byte32 = App.bytes32FromHash(res[0].hash);
-          console.log(byte32);
-          console.log(data);
-          return instance.createBounty(byte32, parseInt(data.amount), {from: account, gas: 3000000}).then(function(result) {
+          var bountyId = App.bytes32FromHash(res[0].hash);
+          return instance.createBounty(bountyId, parseInt(data.amount), {from: account, gas: 3000000}).then(function(result) {
             return App.getMyBounties();
           }).catch(function(err) {
             console.log(err.message);
@@ -124,6 +122,11 @@ App = {
     });
   },
 
+  handleAddSubmissionClicked: function(e) {
+    $('#addSubmissionModal').data('bounty-id', $(e.target).data('id'));
+    $('#addSubmissionModal').modal('show');
+  },
+
   handleGetBountyDetails: function(e) {
     e.preventDefault();
     var bytes = $(e.target).data('id');
@@ -141,6 +144,44 @@ App = {
         $('#bountyDetailsModal').modal('show');
       });
     });
+  },
+
+  handleSubmissionFileChanged: function(e) {
+    reader = new FileReader();
+    reader.readAsDataURL();
+    console.log(e.target.files);
+  },
+
+  handleAddSubmission: function(e) {
+    e.preventDefault();
+    var files = $('#submissionFile')[0].files;
+    var bountyId = $('#addSubmissionModal').data('bounty-id');
+    if (files.length != 1) {
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      App.ipfs.files.add(window.IpfsApi().Buffer.from(e.target.result), function(err, res) {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        App.contracts.Bounty.deployed().then(function(instance) {
+          return App.withFirstAccount(function(account) {
+            var submissionId = App.bytes32FromHash(res[0].hash);
+            return instance.createSubmission(bountyId, submissionId, {from: account, gas: 3000000}).then(function(result) {
+              $('#addSubmissionModal').modal('hide');
+              return;
+            }).catch(function(err) {
+              console.log(err);
+            });
+          });
+        });
+      });
+    };
+
+
+    reader.readAsDataURL(files[0]);
   }
 };
 

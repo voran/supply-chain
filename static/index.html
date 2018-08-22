@@ -31,7 +31,7 @@
         <!-- PETS LOAD HERE -->
       </div>
       <div class="row text-center">
-        <button class="btn btn-lg btn-primary" type="button" data-id="0" data-toggle="modal" data-target="#addBountyModal"><span class="glyphicon glyphicon-plus"></span> Add Bounty</button>
+        <button class="btn btn-lg btn-primary" type="button" data-toggle="modal" data-target="#addBountyModal"><span class="glyphicon glyphicon-plus"></span> Add Bounty</button>
       </div>
     </div>
 
@@ -42,8 +42,8 @@
             <h3 class="panel-title" style="overflow: hidden; text-overflow: ellipsis;"></h3>
           </div>
           <div class="panel-body">
-            <button class="btn btn-default btn-bounty-details" type="button" data-id="0">Details</button>
-            <button class="btn btn-primary btn-add-submission" type="button" data-id="0">Add Submission</button>
+            <button class="btn btn-default btn-bounty-details" type="button">Details</button>
+            <button class="btn btn-primary btn-add-submission" type="button">Add Submission</button>
           </div>
         </div>
       </div>
@@ -88,7 +88,7 @@
 
     <div id="addSubmissionModal" class="modal fade" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
-        <form id="addBountyForm" class="modal-content">
+        <form id="addSubmissionForm" class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title">Add Submission</h4>
@@ -96,21 +96,9 @@
           <div class="modal-body">
             <div class="form-horizontal">
               <div class="form-group">
-                <label class="col-sm-2 control-label">Name</label>
+                <label class="col-sm-2 control-label">File</label>
                 <div class="col-sm-10">
-                  <input type="text" class="form-control" name="name" placeholder="Name">
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label">Amount</label>
-                <div class="col-sm-10">
-                  <input type="number" min="0" step="1" class="form-control" name="amount" placeholder="Amount">
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label">Description</label>
-                <div class="col-sm-10">
-                  <textarea class="form-control" rows="3" name="description" placeholder="Enter short description"></textarea>
+                  <input id="submissionFile" type="file">
                 </div>
               </div>
             </div>
