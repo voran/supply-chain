@@ -4,11 +4,11 @@ const Bounty = artifacts.require('./Bounty.sol');
 contract('Bounty', ([owner, alice, bob, charlie]) => {
   let bounty;
 
-  const bountyId = 1;
+  const bountyId ='0x0000000000000000000000000000000000000000000000000000000000000001';
   const revertMessage = 'VM Exception while processing transaction: revert';
 
-  const bobSubmissionId = 4;
-  const charlieSubmissionId = 5;
+  const bobSubmissionId = '0x0000000000000000000000000000000000000000000000000000000000000001';
+  const charlieSubmissionId = '0x0000000000000000000000000000000000000000000000000000000000000002';
 
   const aliceBalance = 10;
   const bobBalance = 20;
@@ -30,19 +30,18 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
 
     const listResponse = await bounty.listBountySubmissions.call(bountyId, {from: alice});
     assert.equal(2, listResponse.length);
-    assert.equal(bobSubmissionId, listResponse[0].toNumber());
-    assert.equal(charlieSubmissionId, listResponse[1].toNumber());
+    assert.equal(bobSubmissionId, listResponse[0]);
+    assert.equal(charlieSubmissionId, listResponse[1]);
 
     const listMySubmissionsResponse = await bounty.listMySubmissions.call({from: bob});
     assert.equal(1, listMySubmissionsResponse.length);
-    assert.equal(bobSubmissionId, listMySubmissionsResponse[0].toNumber());
+    assert.equal(bobSubmissionId, listMySubmissionsResponse[0]);
 
     await bounty.acceptSubmission(bobSubmissionId, {from: alice});
 
 
-    const bountyAcceptedSubmissionResponse = await bounty.getBountyAcceptedSubmission.call(1, {from: alice});
-    assert.equal(bobSubmissionId, bountyAcceptedSubmissionResponse.toNumber()); // accepted submission
-
+    const bountyAcceptedSubmissionResponse = await bounty.getBountyAcceptedSubmission.call(bountyId, {from: alice});
+    assert.equal(bobSubmissionId, bountyAcceptedSubmissionResponse);
     assert.equal(bobBalance + bountyAmount, (await bounty.balanceOf(bob)).toNumber());
   });
 
@@ -270,7 +269,7 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
 
     const listResponse = await bounty.listBountyRejectedSubmissions.call(bountyId, {from: alice});
     assert.equal(1, listResponse.length);
-    assert.equal(bobSubmissionId, listResponse[0].toNumber()); // bob's submission
+    assert.equal(bobSubmissionId, listResponse[0]); // bob's submission
   });
 
   it('does not reject submission when not bounty owner', async () => {

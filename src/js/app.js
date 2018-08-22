@@ -3,7 +3,11 @@ App = {
   contracts: {},
 
   init: function() {
-    return App.initWeb3();
+    App.ipfs = window.IpfsApi('localhost', '5001');
+    App.web3Provider = new Web3.providers.HttpProvider('http://localhost:9545');
+    web3 = new Web3(App.web3Provider);
+    App.initContract();
+    App.bindEvents();
   },
 
   withFirstAccount: function(cb) {
@@ -16,10 +20,8 @@ App = {
     });
   },
 
-  initWeb3: function() {
-    App.web3Provider = new Web3.providers.HttpProvider('http://localhost:9545');
-    web3 = new Web3(App.web3Provider);
-    return App.initContract();
+  bindEvents: function() {
+    $('#addBountyModal form').on('submit', App.handleAddBounty);
   },
 
   initContract: function() {
@@ -28,12 +30,6 @@ App = {
       App.contracts.Bounty.setProvider(App.web3Provider);
       return App.getMyBounties();
     });
-    return App.bindEvents();
-  },
-
-  bindEvents: function() {
-    $(document).on('click', '.btn-accept', App.handleAccept);
-    $(document).on('click', '.btn-add-bounty', App.handleAddBounty);
   },
 
   getMyBounties: function() {
@@ -70,18 +66,26 @@ App = {
     });
   },
 
-  handleAddBounty: function(event) {
-    event.preventDefault();
+  handleAddBounty: function(e) {
+    e.preventDefault();
+    var data = $('#addBountyModal form').serializeArray().reduce(function(obj, item) {
+        obj[item.name] = item.value;
+        return obj;
+    }, {});
 
-    var bountyId = 4;
-    var price = 10;
-
-    App.contracts.Bounty.deployed().then(function(instance) {
-      return App.withFirstAccount(function(account) {
-        return instance.createBounty(bountyId, price, {from: accounts[0], gas: 3000000}).then(function(result) {
-          return App.getMyBounties();
-        }).catch(function(err) {
-          console.log(err.message);
+    App.ipfs.files.add(window.IpfsApi().Buffer.from(JSON.stringify(data)), function(err, res) {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      App.contracts.Bounty.deployed().then(function(instance) {
+        return App.withFirstAccount(function(account) {
+          console.log(res);
+          return instance.createBounty(res.hash, data.price, {from: accounts[0], gas: 3000000}).then(function(result) {
+            return App.getMyBounties();
+          }).catch(function(err) {
+            console.log(err.message);
+          });
         });
       });
     });

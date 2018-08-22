@@ -5,37 +5,34 @@ import "tokens/contracts/eip20/EIP20.sol";
 contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
 
   // bounty owner -> bounty hashes
-  mapping (address => uint[]) public bounties;
+  mapping (address => bytes32[]) public bounties;
   // bounty hash -> bounty owner
-  mapping (uint => address) public bountyToOwnerMap;
+  mapping (bytes32 => address) public bountyToOwnerMap;
   // bounty hash -> bounty amounts
-  mapping (uint => uint) public bountyAmounts;
+  mapping (bytes32 => uint) public bountyAmounts;
   // submitter -> submission hashes
-  mapping (address => uint[]) public submissions;
+  mapping (address => bytes32[]) public submissions;
   // submission hash -> submitter address
-  mapping (uint => address) public submissionToSubmitterMap;
+  mapping (bytes32 => address) public submissionToSubmitterMap;
   // submission hash -> bounty hash
-  mapping (uint => uint) public submissionToBountyMap;
+  mapping (bytes32 => bytes32) public submissionToBountyMap;
   // bounty hash to submissions map
-  mapping (uint => uint[]) public bountyToSubmissionsMap;
+  mapping (bytes32 => bytes32[]) public bountyToSubmissionsMap;
   // bounty hash -> accepted submission hash
-  mapping (uint => uint) public bountyToAcceptedSubmissionMap;
+  mapping (bytes32 => bytes32) public bountyToAcceptedSubmissionMap;
   // submission hash -> bool (rejected)
-  mapping (uint => bool) public rejectedSubmissions;
+  mapping (bytes32 => bool) public rejectedSubmissions;
   // submission hash -> bool (rejected)
-  mapping (uint => uint[]) public bountyToRejectedSubmissionsMap;
+  mapping (bytes32 => bytes32[]) public bountyToRejectedSubmissionsMap;
 
-  // check if uint has non-zero value
-  modifier nonZero(uint _hash) { require(_hash > 0); _;}
-
-  // check if uint has zero value
-  modifier zero(uint _hash) { require(_hash == 0); _;}
-
+  modifier nonEmpty(bytes32 _hash) { require(_hash != 0x0000000000000000000000000000000000000000000000000000000000000000); _;}
+  modifier empty(bytes32 _hash) { require(_hash == 0x0000000000000000000000000000000000000000000000000000000000000000); _;}
   modifier isFalse(bool _value) { require(!_value); _;}
+  modifier nonZero(uint amount) { require(amount > 0); _;}
 
-  modifier bountyOwner(uint bountyHash) { require(bountyToOwnerMap[bountyHash] == msg.sender); _;}
+  modifier bountyOwner(bytes32 bountyHash) { require(bountyToOwnerMap[bountyHash] == msg.sender); _;}
 
-  function createBounty(uint bountyHash, uint amount) public nonZero(bountyHash) nonZero(amount) {
+  function createBounty(bytes32 bountyHash, uint amount) public nonEmpty(bountyHash) nonZero(amount) {
     // make sure a bounty with this hash does not exist
     require(bountyAmounts[bountyHash] == 0);
 
@@ -45,10 +42,10 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
     transfer(this, amount);
   }
 
-  function createSubmission(uint bountyHash, uint submissionHash) public
-    nonZero(bountyHash)
-    nonZero(submissionHash)
-    zero(submissionToBountyMap[submissionHash])  {
+  function createSubmission(bytes32 bountyHash, bytes32 submissionHash) public
+    nonEmpty(bountyHash)
+    nonEmpty(submissionHash)
+    empty(submissionToBountyMap[submissionHash])  {
 
     submissions[msg.sender].push(submissionHash);
     submissionToBountyMap[submissionHash] = bountyHash;
@@ -56,35 +53,35 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
     submissionToSubmitterMap[submissionHash] = msg.sender;
   }
 
-  function listMyBounties() public view returns (uint[]) {
+  function listMyBounties() public view returns (bytes32[]) {
     return bounties[msg.sender];
   }
 
-  function listMySubmissions() public view returns (uint[]) {
+  function listMySubmissions() public view returns (bytes32[]) {
     return submissions[msg.sender];
   }
 
-  function listBountySubmissions(uint bountyHash) public view
-    nonZero(bountyHash)
-    bountyOwner(bountyHash) returns (uint[]) {
+  function listBountySubmissions(bytes32 bountyHash) public view
+    nonEmpty(bountyHash)
+    bountyOwner(bountyHash) returns (bytes32[]) {
     return bountyToSubmissionsMap[bountyHash];
   }
 
-  function listBountyRejectedSubmissions(uint bountyHash) public view
-    nonZero(bountyHash)
-    bountyOwner(bountyHash) returns (uint[]) {
+  function listBountyRejectedSubmissions(bytes32 bountyHash) public view
+    nonEmpty(bountyHash)
+    bountyOwner(bountyHash) returns (bytes32[]) {
     return bountyToRejectedSubmissionsMap[bountyHash];
   }
 
-  function getBountyAcceptedSubmission(uint bountyHash) public view
-    nonZero(bountyHash)
-    bountyOwner(bountyHash) returns (uint) {
+  function getBountyAcceptedSubmission(bytes32 bountyHash) public view
+    nonEmpty(bountyHash)
+    bountyOwner(bountyHash) returns (bytes32) {
     return bountyToAcceptedSubmissionMap[bountyHash];
   }
 
-  function acceptSubmission(uint submissionHash) public
-    nonZero(submissionHash)
-    zero(bountyToAcceptedSubmissionMap[submissionToBountyMap[submissionHash]])
+  function acceptSubmission(bytes32 submissionHash) public
+    nonEmpty(submissionHash)
+    empty(bountyToAcceptedSubmissionMap[submissionToBountyMap[submissionHash]])
     isFalse(rejectedSubmissions[submissionHash])
     bountyOwner(submissionToBountyMap[submissionHash]) {
 
@@ -92,9 +89,9 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
     this.transfer(submissionToSubmitterMap[submissionHash], bountyAmounts[submissionToBountyMap[submissionHash]]);
   }
 
-  function rejectSubmission(uint submissionHash) public
-    nonZero(submissionHash)
-    zero(bountyToAcceptedSubmissionMap[submissionToBountyMap[submissionHash]])
+  function rejectSubmission(bytes32 submissionHash) public
+    nonEmpty(submissionHash)
+    empty(bountyToAcceptedSubmissionMap[submissionToBountyMap[submissionHash]])
     isFalse(rejectedSubmissions[submissionHash])
     bountyOwner(submissionToBountyMap[submissionHash]) {
 
