@@ -175,6 +175,74 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     assert.equal(err.message, revertMessage);
   });
 
+  it('does not accept submission when already accepted', async () => {
+    const bountyAmount = 3;
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
+    await bounty.acceptSubmission(bobSubmissionId, {from: alice});
+
+    let err;
+    try {
+      await bounty.acceptSubmission(bobSubmissionId, {from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
+  it('does not accept submission when already rejected', async () => {
+    const bountyAmount = 3;
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
+    await bounty.rejectSubmission(bobSubmissionId, {from: alice});
+
+    let err;
+    try {
+      await bounty.acceptSubmission(bobSubmissionId, {from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
+  it('does not reject submission when already accepted', async () => {
+    const bountyAmount = 3;
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
+    await bounty.acceptSubmission(bobSubmissionId, {from: alice});
+
+    let err;
+    try {
+      await bounty.rejectSubmission(bobSubmissionId, {from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
+  it('does not reject submission when already rejected', async () => {
+    const bountyAmount = 3;
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
+    await bounty.rejectSubmission(bobSubmissionId, {from: alice});
+
+    let err;
+    try {
+      await bounty.rejectSubmission(bobSubmissionId, {from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
   it('does not accept submission when not bounty owner', async () => {
     const bountyAmount = 3;
     await bounty.createBounty(bountyId, bountyAmount, {from: alice});
