@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Pete's Pet Shop</title>
+    <title>Bounty List</title>
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -21,13 +21,17 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12 col-sm-8 col-sm-push-2">
-          <h1 class="text-center">Pete's Pet Shop</h1>
-          <hr/>
-          <br/>
+          <h1 class="text-center">Bounty List</h1>
         </div>
       </div>
-
+      <h3> My Bounties</h3>
+      <hr/>
       <div id="bountyRow" class="row">
+        <!-- PETS LOAD HERE -->
+      </div>
+      <h3> My Submissions</h3>
+      <hr/>
+      <div id="submissionRow" class="row">
         <!-- PETS LOAD HERE -->
       </div>
       <div class="row text-center">
@@ -42,8 +46,21 @@
             <h3 class="panel-title" style="overflow: hidden; text-overflow: ellipsis;"></h3>
           </div>
           <div class="panel-body">
-            <button class="btn btn-default btn-bounty-details" type="button">Details</button>
-            <button class="btn btn-primary btn-add-submission" type="button">Add Submission</button>
+            <button class="btn btn-default btn-bounty-details" type="button"><span class="glyphicon glyphicon-info-sign"></span> More</button>
+            <button class="btn btn-primary btn-add-submission" type="button"><span class="glyphicon glyphicon-plus"></span> Add Submission</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="submissionTemplate" style="display: none;">
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="panel panel-default panel-bounty">
+          <div class="panel-heading">
+            <h3 class="panel-title" style="overflow: hidden; text-overflow: ellipsis;"></h3>
+          </div>
+          <div class="panel-body">
+            <button class="btn btn-default btn-download-submission" type="button"><span class="glyphicon glyphicon-download"></span> Download</button>
           </div>
         </div>
       </div>

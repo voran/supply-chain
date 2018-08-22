@@ -47,7 +47,8 @@ App = {
     $.getJSON('contracts/Bounty.json', function(BountyArtifact) {
       App.contracts.Bounty = TruffleContract(BountyArtifact);
       App.contracts.Bounty.setProvider(App.web3Provider);
-      return App.getMyBounties();
+      App.getMyBounties();
+      App.getMySubmissions();
     });
   },
 
@@ -63,6 +64,24 @@ App = {
             bountyTemplate.find('.btn').attr('data-id', bounties[i]);
 
             bountyRow.append(bountyTemplate.html());
+          }
+        });
+      });
+    });
+  },
+
+  getMySubmissions: function() {
+    var submissionRow = $('#submissionRow');
+    var submissionTemplate = $('#submissionTemplate');
+    App.contracts.Bounty.deployed().then(function(instance) {
+      return App.withFirstAccount(function(account) {
+        submissionRow.html('');
+        instance.listMySubmissions.call({from: account}).then(function(submissions) {
+          for (i = 0; i < submissions.length; i ++) {
+            submissionTemplate.find('.panel-title').text(submissions[i]);
+            submissionTemplate.find('.btn').attr('data-id', submissions[i]);
+
+            submissionRow.append(submissionTemplate.html());
           }
         });
       });
