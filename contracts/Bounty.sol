@@ -20,31 +20,35 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   mapping (uint => uint[]) public bountyToSubmissionsMap;
   // bounty hash -> accepted submission hash
   mapping (uint => uint) public bountyToAcceptedSubmissionMap;
+  // submission hash -> bool (rejected)
+  mapping (uint => bool) public rejectedSubmissions;
+  // submission hash -> bool (rejected)
+  mapping (uint => uint[]) public bountyToRejectedSubmissionsMap;
 
-  // check if uint has non-default value
-  modifier nonDefaultValue(uint _hash) { assert(_hash > 0); _;}
+  // check if uint has non-zero value
+  modifier nonZero(uint _hash) { require(_hash > 0); _;}
 
-  // check if uint has default value
-  modifier defaultValue(uint _hash) { assert(_hash == 0); _;}
+  // check if uint has zero value
+  modifier zero(uint _hash) { require(_hash == 0); _;}
+
+  modifier isFalse(bool _value) { require(!_value); _;}
 
   modifier bountyOwner(uint bountyHash) { require(bountyToOwnerMap[bountyHash] == msg.sender); _;}
 
-  function createBounty(uint hash, uint amount) public returns (bool) {
+  function createBounty(uint bountyHash, uint amount) public nonZero(bountyHash) nonZero(amount) {
     // make sure a bounty with this hash does not exist
-    require(bountyAmounts[hash] == 0);
+    require(bountyAmounts[bountyHash] == 0);
 
-    bool transferSuccess = transfer(this, amount);
-
-    if (transferSuccess) {
-      bounties[msg.sender].push(hash);
-      bountyToOwnerMap[hash] = msg.sender;
-      bountyAmounts[hash] = amount;
-    }
-    return transferSuccess;
+    bounties[msg.sender].push(bountyHash);
+    bountyToOwnerMap[bountyHash] = msg.sender;
+    bountyAmounts[bountyHash] = amount;
+    transfer(this, amount);
   }
 
   function createSubmission(uint bountyHash, uint submissionHash) public
-    defaultValue(submissionToBountyMap[submissionHash]) nonDefaultValue(bountyHash) nonDefaultValue(submissionHash) {
+    nonZero(bountyHash)
+    nonZero(submissionHash)
+    zero(submissionToBountyMap[submissionHash])  {
 
     submissions[msg.sender].push(submissionHash);
     submissionToBountyMap[submissionHash] = bountyHash;
@@ -60,22 +64,41 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
     return submissions[msg.sender];
   }
 
-  function listBountySubmissions(uint bountyHash) public view bountyOwner(bountyHash) returns (uint[]) {
+  function listBountySubmissions(uint bountyHash) public view
+    nonZero(bountyHash)
+    bountyOwner(bountyHash) returns (uint[]) {
     return bountyToSubmissionsMap[bountyHash];
   }
 
-  function getBountyAcceptedSubmission(uint bountyHash) public view bountyOwner(bountyHash) returns (uint) {
+  function listBountyRejectedSubmissions(uint bountyHash) public view
+    nonZero(bountyHash)
+    bountyOwner(bountyHash) returns (uint[]) {
+    return bountyToRejectedSubmissionsMap[bountyHash];
+  }
+
+  function getBountyAcceptedSubmission(uint bountyHash) public view
+    nonZero(bountyHash)
+    bountyOwner(bountyHash) returns (uint) {
     return bountyToAcceptedSubmissionMap[bountyHash];
   }
 
-  function acceptSubmission(uint submissionHash) public nonDefaultValue(submissionHash) defaultValue(bountyToAcceptedSubmissionMap[bountyHash]) returns (bool) {
-    uint bountyHash = submissionToBountyMap[submissionHash];
-    uint256 bountyAmount = bountyAmounts[bountyHash];
-    address submitterAddress = submissionToSubmitterMap[submissionHash];
-    bool transferSuccess = this.transfer(submitterAddress, bountyAmount);
-    if (transferSuccess) {
-      bountyToAcceptedSubmissionMap[bountyHash] = submissionHash;
-    }
-    return transferSuccess;
+  function acceptSubmission(uint submissionHash) public
+    nonZero(submissionHash)
+    zero(bountyToAcceptedSubmissionMap[submissionToBountyMap[submissionHash]])
+    isFalse(rejectedSubmissions[submissionHash])
+    bountyOwner(submissionToBountyMap[submissionHash]) {
+
+    bountyToAcceptedSubmissionMap[submissionToBountyMap[submissionHash]] = submissionHash;
+    this.transfer(submissionToSubmitterMap[submissionHash], bountyAmounts[submissionToBountyMap[submissionHash]]);
+  }
+
+  function rejectSubmission(uint submissionHash) public
+    nonZero(submissionHash)
+    zero(bountyToAcceptedSubmissionMap[submissionToBountyMap[submissionHash]])
+    isFalse(rejectedSubmissions[submissionHash])
+    bountyOwner(submissionToBountyMap[submissionHash]) {
+
+    bountyToRejectedSubmissionsMap[submissionToBountyMap[submissionHash]].push(submissionHash);
+    rejectedSubmissions[submissionHash] = true;
   }
 }
