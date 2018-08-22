@@ -5,7 +5,7 @@ import "tokens/contracts/eip20/EIP20.sol";
 contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
 
   // bounty owner -> bounty hashes
-  mapping (address => bytes32[]) public bounties;
+  bytes32[] public bounties;
   // bounty hash -> bounty owner
   mapping (bytes32 => address) public bountyToOwnerMap;
   // bounty hash -> bounty amounts
@@ -16,7 +16,7 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   mapping (bytes32 => address) public submissionToSubmitterMap;
   // submission hash -> bounty hash
   mapping (bytes32 => bytes32) public submissionToBountyMap;
-  // bounty hash to submissions map
+  // bounty hash- to submissions map
   mapping (bytes32 => bytes32[]) public bountyToSubmissionsMap;
   // bounty hash -> accepted submission hash
   mapping (bytes32 => bytes32) public bountyToAcceptedSubmissionMap;
@@ -36,7 +36,7 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
     // make sure a bounty with this hash does not exist
     require(bountyAmounts[bountyHash] == 0);
 
-    bounties[msg.sender].push(bountyHash);
+    bounties.push(bountyHash);
     bountyToOwnerMap[bountyHash] = msg.sender;
     bountyAmounts[bountyHash] = amount;
     transfer(this, amount);
@@ -53,8 +53,8 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
     submissionToSubmitterMap[submissionHash] = msg.sender;
   }
 
-  function listMyBounties() public view returns (bytes32[]) {
-    return bounties[msg.sender];
+  function listBounties() public view returns (bytes32[]) {
+    return bounties;
   }
 
   function listMySubmissions() public view returns (bytes32[]) {

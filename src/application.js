@@ -6,7 +6,7 @@ App = {
 
   init: function() {
     App.ipfs = window.IpfsApi('localhost', '5001');
-    App.web3Provider = new Web3.providers.HttpProvider('http://localhost:9545');
+    App.web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
     web3 = new Web3(App.web3Provider);
     App.initContract();
     App.bindEvents();
@@ -61,7 +61,7 @@ App = {
     App.contracts.Bounty.deployed().then(function(instance) {
       return App.withFirstAccount(function(account) {
         bountyRow.html('');
-        instance.listMyBounties.call({from: account}).then(function(bounties) {
+        instance.listBounties.call({from: account}).then(function(bounties) {
           for (i = 0; i < bounties.length; i ++) {
             bountyTemplate.find('.panel-title').text(bounties[i]);
             bountyTemplate.find('.btn').attr('data-id', bounties[i]);
@@ -188,7 +188,6 @@ App = {
                     submissionTemplate.find('.btn-accept-submission').addClass('hidden');
                     submissionTemplate.find('.btn-reject-submission').addClass('hidden');
                   }
-                  
                   if (acceptedSubmission == submissions[i]) {
                     submissionTemplate.find('.label-success').removeClass('hidden');
                   }

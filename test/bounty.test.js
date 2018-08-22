@@ -291,7 +291,7 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
   });
 
   it('lists bounties when none', async () => {
-    const response = await bounty.listMyBounties.call({from: alice});
+    const response = await bounty.listBounties.call({from: alice});
     assert.equal(response.length, 0);
   });
 
