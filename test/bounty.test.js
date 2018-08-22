@@ -24,7 +24,6 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
 
     await bounty.createBounty(bountyId, bountyAmount, {from: alice});
     assert.equal(aliceBalance - bountyAmount, (await bounty.balanceOf(alice)).toNumber());
-
     await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
     await bounty.createSubmission(bountyId, charlieSubmissionId, {from: charlie});
 
@@ -32,10 +31,6 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     assert.equal(2, listResponse.length);
     assert.equal(bobSubmissionId, listResponse[0]);
     assert.equal(charlieSubmissionId, listResponse[1]);
-
-    const listMySubmissionsResponse = await bounty.listMySubmissions.call({from: bob});
-    assert.equal(1, listMySubmissionsResponse.length);
-    assert.equal(bobSubmissionId, listMySubmissionsResponse[0]);
 
     await bounty.acceptSubmission(bobSubmissionId, {from: alice});
 
@@ -219,10 +214,6 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
 
     await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
     await bounty.rejectSubmission(bobSubmissionId, {from: alice});
-
-    const listResponse = await bounty.listBountyRejectedSubmissions.call(bountyId, {from: alice});
-    assert.equal(1, listResponse.length);
-    assert.equal(bobSubmissionId, listResponse[0]);
   });
 
   it('does not reject submission when not bounty owner', async () => {
@@ -249,7 +240,7 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
   });
 
   it('lists submissions when none', async () => {
-    const response = await bounty.listMySubmissions.call({from: bounty.address});
+    const response = await bounty.listBounties.call({from: alice});
     assert.equal(response.length, 0);
   });
 });
