@@ -29,13 +29,18 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
 
   modifier bountyOwner(uint bountyHash) { require(bountyToOwnerMap[bountyHash] == msg.sender); _;}
 
-  function createBounty(uint hash, uint amount) public {
+  function createBounty(uint hash, uint amount) public returns (bool) {
     // make sure a bounty with this hash does not exist
     require(bountyAmounts[hash] == 0);
 
-    bounties[msg.sender].push(hash);
-    bountyToOwnerMap[hash] = msg.sender;
-    bountyAmounts[hash] = amount;
+    bool transferSuccess = transfer(this, amount);
+
+    if (transferSuccess) {
+      bounties[msg.sender].push(hash);
+      bountyToOwnerMap[hash] = msg.sender;
+      bountyAmounts[hash] = amount;
+    }
+    return transferSuccess;
   }
 
   function createSubmission(uint bountyHash, uint submissionHash) public
@@ -67,9 +72,10 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
     uint bountyHash = submissionToBountyMap[submissionHash];
     uint256 bountyAmount = bountyAmounts[bountyHash];
     address submitterAddress = submissionToSubmitterMap[submissionHash];
-    bountyToAcceptedSubmissionMap[bountyHash] = submissionHash;
-
-    approve(submitterAddress, bountyAmount);
-    return transfer(submitterAddress, bountyAmount);
+    bool transferSuccess = this.transfer(submitterAddress, bountyAmount);
+    if (transferSuccess) {
+      bountyToAcceptedSubmissionMap[bountyHash] = submissionHash;
+    }
+    return transferSuccess;
   }
 }

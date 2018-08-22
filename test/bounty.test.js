@@ -1,10 +1,18 @@
 const Bounty = artifacts.require('./Bounty.sol');
 
+const aliceBalance = 10;
+const bobBalance = 20;
+
+const bountyAmount = 3;
+
+
 contract('Bounty', ([owner, alice, bob, charlie]) => {
   let bounty;
 
   beforeEach('setup contract for each test', async () => {
     bounty = await Bounty.new();
+    await bounty.transfer(alice, aliceBalance);
+    await bounty.transfer(bob, bobBalance);
   });
 
   it('creates bounty', async () => {
@@ -29,22 +37,17 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
   it('accepts submission', async () => {
     const bountyId = 1;
 
-    const initialAmount = 30;
-    const bountyAmount = 3;
-
     const bobSubmissionId = 4;
     const charlieSubmissionId = 5;
 
-    await bounty.approve(alice, initialAmount);
-    await bounty.transfer(alice, initialAmount);
-
+    assert.equal(true, await bounty.createBounty.call(bountyId, bountyAmount, {from: alice}));
     await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    assert.equal(aliceBalance - bountyAmount, (await bounty.balanceOf(alice)).toNumber());
+
     await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
     await bounty.createSubmission(bountyId, charlieSubmissionId, {from: charlie});
 
-    const acceptResponse = await bounty.acceptSubmission.call(bobSubmissionId, {from: alice});
-    assert.equal(true, acceptResponse);
-
+    assert.equal(true, await bounty.acceptSubmission.call(bobSubmissionId, {from: alice}));
     await bounty.acceptSubmission(bobSubmissionId, {from: alice});
 
     const listResponse = await bounty.listBountySubmissions.call(bountyId, {from: alice});
@@ -55,8 +58,7 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     const bountyAcceptedSubmissionResponse = await bounty.getBountyAcceptedSubmission.call(1, {from: alice});
     assert.equal(bobSubmissionId, bountyAcceptedSubmissionResponse.toNumber()); // accepted submission
 
-    assert.equal(initialAmount - bountyAmount, (await bounty.balanceOf(alice)).toNumber());
-    assert.equal(bountyAmount, (await bounty.balanceOf(bob)).toNumber());
+    assert.equal(bobBalance + bountyAmount, (await bounty.balanceOf(bob)).toNumber());
   });
 
   it('lists submissions when none', async () => {
