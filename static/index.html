@@ -59,21 +59,21 @@
           <div class="modal-body">
             <div class="form-horizontal">
               <div class="form-group">
-                <label for="bountyName" class="col-sm-2 control-label">Name</label>
+                <label class="col-sm-2 control-label">Name</label>
                 <div class="col-sm-10">
-                  <input type="text" class="form-control" id="bountyName" name="name" placeholder="Name">
+                  <input type="text" class="form-control" name="name" placeholder="Name">
                 </div>
               </div>
               <div class="form-group">
-                <label for="bountyAmount" class="col-sm-2 control-label">Amount</label>
+                <label class="col-sm-2 control-label">Amount</label>
                 <div class="col-sm-10">
-                  <input type="number" min="0" step="1" class="form-control" id="bountyAmount" name="amount" placeholder="Amount">
+                  <input type="number" min="0" step="1" class="form-control" name="amount" placeholder="Amount">
                 </div>
               </div>
               <div class="form-group">
-                <label for="bountyDescription" class="col-sm-2 control-label">Description</label>
+                <label class="col-sm-2 control-label">Description</label>
                 <div class="col-sm-10">
-                  <textarea class="form-control" rows="3" id="bountyDescription" name="description" placeholder="Enter short description"></textarea>
+                  <textarea class="form-control" rows="3" name="description" placeholder="Enter short description"></textarea>
                 </div>
               </div>
             </div>
@@ -86,6 +86,42 @@
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
+    <div id="bountyDetailsModal" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Add Bounty</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-horizontal">
+              <div class="form-group">
+                <label for="bountyName" class="col-sm-2 control-label">Name</label>
+                <div class="col-sm-10">
+                  <pre id="bountyName"></pre>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="bountyAmount" class="col-sm-2 control-label">Amount</label>
+                <div class="col-sm-10">
+                  <pre id="bountyAmount"></pre>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="bountyDescription" class="col-sm-2 control-label">Description</label>
+                <div class="col-sm-10">
+                  <pre id="bountyDescription"></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://unpkg.com/ipfs-api@9.0.0/dist/index.js"></script>
@@ -93,6 +129,6 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/web3.min.js"></script>
     <script src="js/truffle-contract.js"></script>
-    <script src="js/app.js"></script>
+    <script src="app.js"></script>
   </body>
 </html>

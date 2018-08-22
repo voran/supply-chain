@@ -1,8 +1,9 @@
 const express = require('express');
 const app = express();
 
-app.use(express.static('src'));
-app.use(express.static('build/contracts'));
+app.use(express.static('static'));
+app.use(express.static('build'));
+app.use(express.static('build'));
 
 app.get('/api/contracts', (req, res) => res.send('Hello World!'));
 
