@@ -6,7 +6,7 @@ App = {
 
   init: function() {
     App.ipfs = window.IpfsApi('localhost', '5001');
-    App.web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
+    App.web3Provider = web3.currentProvider; // || new Web3.providers.HttpProvider('http://localhost:8545');
     web3 = new Web3(App.web3Provider);
     App.initContract();
     App.bindEvents();
@@ -175,35 +175,33 @@ App = {
     return App.contracts.Bounty.deployed().then(function(instance) {
       return App.withFirstAccount(function(account) {
         return instance.getBountyAcceptedSubmission.call(bountyId, {from: account}).then(function(acceptedSubmission) {
-          return instance.listBountySubmissions.call(bountyId, {from: account}).then(function(results) {
+          return instance.listBountySubmissions.call(bountyId, {from: account}).then(function(submissions) {
             return instance.listBountyRejectedSubmissions.call(bountyId, {from: account}).then(function(rejectedSubmissions) {
               submissionRow.html('');
-              instance.listMySubmissions.call({from: account}).then(function(submissions) {
-                for (i = 0; i < submissions.length; i ++) {
-                  submissionTemplate.find('.label-success').addClass('hidden');
-                  submissionTemplate.find('.label-danger').addClass('hidden');
-                  submissionTemplate.find('.btn-accept-submission').removeClass('hidden');
-                  submissionTemplate.find('.btn-reject-submission').removeClass('hidden');
-                  if (acceptedSubmission != '0x0000000000000000000000000000000000000000000000000000000000000000') {
-                    submissionTemplate.find('.btn-accept-submission').addClass('hidden');
-                    submissionTemplate.find('.btn-reject-submission').addClass('hidden');
-                  }
-                  if (acceptedSubmission == submissions[i]) {
-                    submissionTemplate.find('.label-success').removeClass('hidden');
-                  }
-
-                  if (rejectedSubmissions.indexOf(submissions[i]) != -1) {
-                    submissionTemplate.find('.label-danger').removeClass('hidden');
-                    submissionTemplate.find('.btn-accept-submission').addClass('hidden');
-                    submissionTemplate.find('.btn-reject-submission').addClass('hidden');
-                  }
-                  submissionTemplate.find('.submission-id').html(submissions[i]);
-                  submissionTemplate.find('.btn').attr('data-bounty-id', bountyId);
-                  submissionTemplate.find('.btn').attr('data-id', submissions[i]);
-
-                  submissionRow.append(submissionTemplate.html());
+              for (i = 0; i < submissions.length; i ++) {
+                submissionTemplate.find('.label-success').addClass('hidden');
+                submissionTemplate.find('.label-danger').addClass('hidden');
+                submissionTemplate.find('.btn-accept-submission').removeClass('hidden');
+                submissionTemplate.find('.btn-reject-submission').removeClass('hidden');
+                if (acceptedSubmission != '0x0000000000000000000000000000000000000000000000000000000000000000') {
+                  submissionTemplate.find('.btn-accept-submission').addClass('hidden');
+                  submissionTemplate.find('.btn-reject-submission').addClass('hidden');
                 }
-              });
+                if (acceptedSubmission == submissions[i]) {
+                  submissionTemplate.find('.label-success').removeClass('hidden');
+                }
+
+                if (rejectedSubmissions.indexOf(submissions[i]) != -1) {
+                  submissionTemplate.find('.label-danger').removeClass('hidden');
+                  submissionTemplate.find('.btn-accept-submission').addClass('hidden');
+                  submissionTemplate.find('.btn-reject-submission').addClass('hidden');
+                }
+                submissionTemplate.find('.submission-id').html(submissions[i]);
+                submissionTemplate.find('.btn').attr('data-bounty-id', bountyId);
+                submissionTemplate.find('.btn').attr('data-id', submissions[i]);
+
+                submissionRow.append(submissionTemplate.html());
+              }
             });
           });
         });

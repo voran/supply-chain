@@ -5,7 +5,7 @@ This system is a distributed app for a bounty system. It uses IPFS for file/meta
 A user may submit a bounty for some work to be done. They may set an name, a sort description, and an amount. The bounty name, amount, and description is then saved to ipfs. The bounty and the amount is then also saved on the blockchain, and the bounty amount is escrowed from the submitter account.
 
 ## User Lists Bounties
-
+A user may
 # Set Up
 * We assume that you have truffle ganache, and ipfs already installed.
 * This will not use Metamask for web3 but will inject its own, if you wish to use metamask you need to change src/application.js
@@ -24,9 +24,9 @@ $ ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http://local
 ## Running
 ```
 # run in separate terminals:
-npm start
 ipfs daemon
 ganache-cli
+truffle migrate && npm start
 ```
 
 ## Testing

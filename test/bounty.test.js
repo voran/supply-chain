@@ -45,53 +45,6 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     assert.equal(bobBalance + bountyAmount, (await bounty.balanceOf(bob)).toNumber());
   });
 
-
-  it('does not list bounty submissions for non-owner', async () => {
-    const bountyAmount = 2;
-    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
-
-    let err;
-    try {
-      await bounty.listBountySubmissions.call(bountyId, {from: bob});
-    } catch (error) {
-      err = error;
-    }
-
-    assert.ok(err instanceof Error);
-    assert.equal(err.message, revertMessage);
-  });
-
-
-  it('does not get bounty accepted submission for non-owner', async () => {
-    const bountyAmount = 2;
-    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
-
-    let err;
-    try {
-      await bounty.getBountyAcceptedSubmission.call(bountyId, {from: bob});
-    } catch (error) {
-      err = error;
-    }
-
-    assert.ok(err instanceof Error);
-    assert.equal(err.message, revertMessage);
-  });
-
-  it('does not list bounty rejected submissions for non-owner', async () => {
-    const bountyAmount = 2;
-    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
-
-    let err;
-    try {
-      await bounty.listBountyRejectedSubmissions.call(bountyId, {from: bob});
-    } catch (error) {
-      err = error;
-    }
-
-    assert.ok(err instanceof Error);
-    assert.equal(err.message, revertMessage);
-  });
-
   it('does not create bounty on zero amount', async () => {
     const bountyAmount = 0;
 
