@@ -38,9 +38,10 @@ App = {
 
   bindEvents: function() {
     $('#addBountyForm').on('submit', App.handleAddBounty);
+    $('#addSubmissionForm').on('submit', App.handleAddSubmission);
     $(document).on('click', '.btn-bounty-details', App.handleGetBountyDetails);
     $(document).on('click', '.btn-add-submission', App.handleAddSubmissionClicked);
-    $('#addSubmissionForm').on('submit', App.handleAddSubmission);
+    $(document).on('click', '.btn-download-submission', App.handleGetSubmissionDowload);
   },
 
   initContract: function() {
@@ -137,7 +138,7 @@ App = {
     });
 
     res.on('end', function() {
-     cb(JSON.parse(string));
+     cb(string);
     });
   },
 
@@ -157,9 +158,10 @@ App = {
       }
 
       App.handleResponse(res, function(data) {
-        $('#bountyName').html(data.name);
-        $('#bountyAmount').html(data.amount);
-        $('#bountyDescription').html(data.description);
+        var jsonData = JSON.parse(data);
+        $('#bountyName').html(jsonData.name);
+        $('#bountyAmount').html(jsonData.amount);
+        $('#bountyDescription').html(jsonData.description);
         $('#bountyDetailsModal').modal('show');
 
         var submissionTemplate = $('#submissionRowTemplate');
@@ -180,6 +182,24 @@ App = {
             });
           });
         });
+      });
+    });
+  },
+
+
+  handleGetSubmissionDowload: function(e) {
+    e.preventDefault();
+    var bountyId = $(e.target).data('id');
+
+    App.ipfs.files.cat(App.hashFromBytes32(bountyId), function(err, res) {
+      if (err) {
+        console.log(err);
+        return;
+      }
+
+      App.handleResponse(res, function(data) {
+        $('#submissionDownloadLink').attr('href', data.replace('data:;base64,', 'data:application/octet-stream;charset=utf-8;base64,'));
+        $('#submissionDownloadModal').modal('show');
       });
     });
   },
