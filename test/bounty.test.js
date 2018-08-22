@@ -1,5 +1,4 @@
 const Bounty = artifacts.require('./Bounty.sol');
-const EIP20 = artifacts.require('tokens/contracts/eip20/EIP20.sol');
 
 contract('Bounty', ([owner, alice, bob, charlie]) => {
   let bounty;
