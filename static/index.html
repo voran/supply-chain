@@ -129,14 +129,14 @@
     </div><!-- /.modal -->
 
     <div id="bountyDetailsModal" class="modal fade" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
+      <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title">View Bounty</h4>
           </div>
           <div class="modal-body">
-            <div class="form-horizontal">
+            <div class="form-horizontal col-md-offset-2 col-md-8">
               <div class="form-group">
                 <label for="bountyName" class="col-sm-2 control-label">Name</label>
                 <div class="col-sm-10">
@@ -153,6 +153,25 @@
                 <label for="bountyDescription" class="col-sm-2 control-label">Description</label>
                 <div class="col-sm-10">
                   <pre id="bountyDescription"></pre>
+                </div>
+              </div>
+            </div>
+            <h2>Submissions</h2>
+            <hr/>
+            <div id="submissionTable"></div>
+            <div id="submissionRowTemplate" style="display: none">
+              <div class="row">
+                <div class="col-md-8 submission-id text-small" style="overflow: hidden; text-overflow:ellipsis;"></div>
+                <div class="col-md-4 clearfux">
+                  <button class="btn btn-sm btn-default btn-download-submission" type="button">
+                    <span class="glyphicon glyphicon-download"></span> Download
+                  </button>
+                  <button class="btn btn-sm btn-primary btn-approve-submission" type="button">
+                    <span class="glyphicon glyphicon-ok"></span> Approve
+                  </button>
+                  <button class="btn btn-sm btn-danger btn-approve-submission" type="button">
+                    <span class="glyphicon glyphicon-remove"></span> Reject
+                  </button>
                 </div>
               </div>
             </div>

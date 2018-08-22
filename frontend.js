@@ -148,9 +148,9 @@ App = {
 
   handleGetBountyDetails: function(e) {
     e.preventDefault();
-    var bytes = $(e.target).data('id');
+    var bountyId = $(e.target).data('id');
 
-    App.ipfs.files.cat(App.hashFromBytes32(bytes), function(err, res) {
+    App.ipfs.files.cat(App.hashFromBytes32(bountyId), function(err, res) {
       if (err) {
         console.log(err);
         return;
@@ -161,6 +161,25 @@ App = {
         $('#bountyAmount').html(data.amount);
         $('#bountyDescription').html(data.description);
         $('#bountyDetailsModal').modal('show');
+
+        var submissionTemplate = $('#submissionRowTemplate');
+        var submissionRow = $('#submissionTable');
+
+        App.contracts.Bounty.deployed().then(function(instance) {
+          return App.withFirstAccount(function(account) {
+            return instance.listBountySubmissions.call(bountyId, {from: account}).then(function(results) {
+              submissionRow.html('');
+              instance.listMySubmissions.call({from: account}).then(function(submissions) {
+                for (i = 0; i < submissions.length; i ++) {
+                  submissionTemplate.find('.submission-id').html(submissions[i]);
+                  submissionTemplate.find('.btn').attr('data-id', submissions[i]);
+
+                  submissionRow.append(submissionTemplate.html());
+                }
+              });
+            });
+          });
+        });
       });
     });
   },
@@ -189,6 +208,7 @@ App = {
           return App.withFirstAccount(function(account) {
             var submissionId = App.bytes32FromHash(res[0].hash);
             return instance.createSubmission(bountyId, submissionId, {from: account, gas: 3000000}).then(function(result) {
+              App.getMySubmissions();
               $('#addSubmissionModal').modal('hide');
               return;
             }).catch(function(err) {
