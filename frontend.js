@@ -2,6 +2,7 @@
 App = {
   web3Provider: null,
   contracts: {},
+  bs58: require('bs58'),
 
   init: function() {
     App.ipfs = window.IpfsApi('localhost', '5001');
@@ -11,8 +12,18 @@ App = {
     App.bindEvents();
   },
 
-  byte32FromHash: function(hash) {
-    return `0x${require('bs58').decode(hash).slice(2).toString('hex')}`;
+  bytes32FromHash: function(hash) {
+    return `0x${App.bs58.decode(hash).slice(2).toString('hex')}`;
+  },
+
+  hashFromBytes32: function(bytes32Hex) {
+    // Add our default ipfs values for first 2 bytes:
+    // function:0x12=sha2, size:0x20=256 bits
+    // and cut off leading "0x"
+    var hashHex = '1220' + bytes32Hex.slice(2);
+    var hashBytes = window.IpfsApi().Buffer.from(hashHex, 'hex');
+    var hashStr = App.bs58.encode(hashBytes);
+    return hashStr;
   },
 
   withFirstAccount: function(cb) {
@@ -27,6 +38,7 @@ App = {
 
   bindEvents: function() {
     $('#addBountyForm').on('submit', App.handleAddBounty);
+    $(document).on('click', '.btn-bounty-details', App.handleGetBountyDetails);
   },
 
   initContract: function() {
@@ -47,7 +59,7 @@ App = {
         instance.listMyBounties.call({from: account}).then(function(bounties) {
           for (i = 0; i < bounties.length; i ++) {
             bountyTemplate.find('.panel-title').text(bounties[i]);
-            bountyTemplate.find('.btn-accept').attr('data-id', bounties[i]);
+            bountyTemplate.find('.btn').attr('data-id', bounties[i]);
 
             bountyRow.append(bountyTemplate.html());
           }
@@ -78,6 +90,7 @@ App = {
       return obj;
     }, {});
 
+    console.log(JSON.stringify(data));
     App.ipfs.files.add(window.IpfsApi().Buffer.from(JSON.stringify(data)), function(err, res) {
       if (err) {
         console.log(err);
@@ -85,7 +98,7 @@ App = {
       }
       App.contracts.Bounty.deployed().then(function(instance) {
         return App.withFirstAccount(function(account) {
-          var byte32 = App.byte32FromHash(res[0].hash);
+          var byte32 = App.bytes32FromHash(res[0].hash);
           console.log(byte32);
           console.log(data);
           return instance.createBounty(byte32, parseInt(data.amount), {from: account, gas: 3000000}).then(function(result) {
@@ -94,6 +107,38 @@ App = {
             console.log(err.message);
           });
         });
+      });
+    });
+  },
+
+  handleResponse: function(res, cb) {
+    var string = '';
+    res.on('data', function(buff) {
+      var part = buff.toString();
+      string += part;
+      console.log('stream data ' + part);
+    });
+
+    res.on('end', function() {
+     cb(JSON.parse(string));
+    });
+  },
+
+  handleGetBountyDetails: function(e) {
+    e.preventDefault();
+    var bytes = $(e.target).data('id');
+
+    App.ipfs.files.cat(App.hashFromBytes32(bytes), function(err, res) {
+      if (err) {
+        console.log(err);
+        return;
+      }
+
+      App.handleResponse(res, function(data) {
+        $('#bountyName').html(data.name);
+        $('#bountyAmount').html(data.amount);
+        $('#bountyDescription').html(data.description);
+        $('#bountyDetailsModal').modal('show');
       });
     });
   }
