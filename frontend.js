@@ -42,6 +42,8 @@ App = {
     $(document).on('click', '.btn-bounty-details', App.handleGetBountyDetails);
     $(document).on('click', '.btn-add-submission', App.handleAddSubmissionClicked);
     $(document).on('click', '.btn-download-submission', App.handleGetSubmissionDowload);
+    $(document).on('click', '.btn-accept-submission', App.handleAcceptSubmission);
+    $(document).on('click', '.btn-reject-submission', App.handleRejectSubmission);
   },
 
   initContract: function() {
@@ -89,14 +91,32 @@ App = {
     });
   },
 
-  handleAccept: function(event) {
+  handleAcceptSubmission: function(event) {
     event.preventDefault();
-    var submissionId = parseInt($(event.target).data('id'));
+    var submissionId = $(event.target).attr('data-id');
+    var bountyId = $(event.target).attr('data-bounty-id');
 
     App.contracts.Bounty.deployed().then(function(instance) {
       return App.withFirstAccount(function(account) {
+        console.log(submissionId);
         return instance.acceptSubmission(submissionId, {from: account}).then(function(result) {
-          // todo: accepted submission
+          App.handleGetBountySubmissions(bountyId);
+        }).catch(function(err) {
+          console.log(err.message);
+        });
+      });
+    });
+  },
+
+  handleRejectSubmission: function(event) {
+    event.preventDefault();
+    var submissionId = $(event.target).attr('data-id');
+    var bountyId = $(event.target).attr('data-bounty-id');
+
+    App.contracts.Bounty.deployed().then(function(instance) {
+      return App.withFirstAccount(function(account) {
+        return instance.rejectSubmission(submissionId, {from: account}).then(function(result) {
+          App.handleGetBountySubmissions(bountyId);
         }).catch(function(err) {
           console.log(err.message);
         });
@@ -143,8 +163,38 @@ App = {
   },
 
   handleAddSubmissionClicked: function(e) {
-    $('#addSubmissionModal').data('bounty-id', $(e.target).data('id'));
+    $('#addSubmissionModal').data('bounty-id', $(e.target).attr('data-id'));
     $('#addSubmissionModal').modal('show');
+  },
+
+  handleGetBountySubmissions: function(bountyId) {
+    var submissionTemplate = $('#submissionRowTemplate');
+    var submissionRow = $('#submissionTable');
+
+    return App.contracts.Bounty.deployed().then(function(instance) {
+      return App.withFirstAccount(function(account) {
+        return instance.getBountyAcceptedSubmission.call(bountyId, {from: account}).then(function(acceptedSubmission) {
+          return instance.listBountySubmissions.call(bountyId, {from: account}).then(function(results) {
+            submissionRow.html('');
+            instance.listMySubmissions.call({from: account}).then(function(submissions) {
+              for (i = 0; i < submissions.length; i ++) {
+                if (acceptedSubmission != '0x0000000000000000000000000000000000000000000000000000000000000000') {
+                  submissionTemplate.find('.btn-accept-submission').hide();
+                  submissionTemplate.find('.btn-reject-submission').hide();
+                } else if (acceptedSubmission == submissions[i]) {
+                  submissionTemplate.removeClass('.hidden');
+                }
+                submissionTemplate.find('.submission-id').html(submissions[i]);
+                submissionTemplate.find('.btn').attr('data-bounty-id', bountyId);
+                submissionTemplate.find('.btn').attr('data-id', submissions[i]);
+
+                submissionRow.append(submissionTemplate.html());
+              }
+            });
+          });
+        });
+      });
+    });
   },
 
   handleGetBountyDetails: function(e) {
@@ -164,32 +214,7 @@ App = {
         $('#bountyDescription').html(jsonData.description);
         $('#bountyDetailsModal').modal('show');
 
-        var submissionTemplate = $('#submissionRowTemplate');
-        var submissionRow = $('#submissionTable');
-
-        App.contracts.Bounty.deployed().then(function(instance) {
-          return App.withFirstAccount(function(account) {
-            return instance.getBountyAcceptedSubmission.call(bountyId, {from: account}).then(function(acceptedSubmission) {
-              return instance.listBountySubmissions.call(bountyId, {from: account}).then(function(results) {
-                submissionRow.html('');
-                instance.listMySubmissions.call({from: account}).then(function(submissions) {
-                  for (i = 0; i < submissions.length; i ++) {
-                    if (acceptedSubmission != '0x0000000000000000000000000000000000000000000000000000000000000000') {
-                      submissionTemplate.find('.btn-accept-submission').hide();
-                      submissionTemplate.find('.btn-reject-submission').hide();
-                    } else if (acceptedSubmission == submissions[i]) {
-                      submissionTemplate.removeClass('.hidden');
-                    }
-                    submissionTemplate.find('.submission-id').html(submissions[i]);
-                    submissionTemplate.find('.btn').attr('data-id', submissions[i]);
-
-                    submissionRow.append(submissionTemplate.html());
-                  }
-                });
-              });
-            });
-          });
-        });
+        App.handleGetBountySubmissions(bountyId);
       });
     });
   },
@@ -206,7 +231,7 @@ App = {
       }
 
       App.handleResponse(res, function(data) {
-        $('#submissionDownloadLink').attr('href', data.replace('data:;base64,', 'data:application/octet-stream;charset=utf-8;base64,'));
+        $('#submissionDownloadLink').attr('href', data);
         $('#submissionDownloadModal').modal('show');
       });
     });
