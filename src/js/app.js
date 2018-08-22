@@ -42,6 +42,7 @@ App = {
     console.log('called getMyBounties');
     App.contracts.Bounty.deployed().then(function(instance) {
       return App.withFirstAccount(function(account) {
+        bountyRow.html('');
         instance.listMyBounties.call({from: account}).then(function(bounties) {
           for (i = 0; i < bounties.length; i ++) {
             bountyTemplate.find('.panel-title').text(bounties[i]);
@@ -81,7 +82,7 @@ App = {
   handleAddBounty: function(event) {
     event.preventDefault();
 
-    var bountyId = 2;
+    var bountyId = 4;
     var price = 10;
 
     web3.eth.getAccounts(function(error, accounts) {
@@ -92,11 +93,13 @@ App = {
       console.log(accounts);
 
       App.contracts.Bounty.deployed().then(function(instance) {
-        return instance.createBounty(bountyId, price, {from: accounts[0], gas: 3000000});
-      }).then(function(result) {
-        return App.getMyBounties();
-      }).catch(function(err) {
-        console.log(err.message);
+        return App.withFirstAccount(function(account) {
+          return instance.createBounty(bountyId, price, {from: accounts[0], gas: 3000000}).then(function(result) {
+            return App.getMyBounties();
+          }).catch(function(err) {
+            console.log(err.message);
+          });
+        });
       });
     });
   }
