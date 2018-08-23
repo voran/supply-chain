@@ -136,7 +136,6 @@ App = {
     res.on('data', function(buff) {
       var part = buff.toString();
       string += part;
-      console.log('stream data ' + part);
     });
 
     res.on('end', function() {
@@ -183,7 +182,7 @@ App = {
     });
   },
 
-  handleGetBountyDetails: function() {
+  handleGetBountyDetails: function(e) {
     var bountyId = $(e.target).attr('data-id');
 
     App.ipfs.files.cat(App.hashFromBytes32(bountyId), function(err, res) {
@@ -246,7 +245,6 @@ App = {
           return App.withFirstAccount(function(account) {
             var submissionId = App.bytes32FromHash(res[0].hash);
             return instance.createSubmission(bountyId, submissionId, {from: account}).then(function(result) {
-              App.handleGetBountyDetails();
               $('#addSubmissionModal').modal('hide');
               return;
             }).catch(function(err) {

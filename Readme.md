@@ -1,13 +1,13 @@
 # Bounty System Dapp
 This system is a distributed app for a bounty system. It uses IPFS for file/metadata storage and the blockchain for permissions and state management. Is also uses an EIP20 token for payments. The following user stories are implemented:
 
-## User Submits Bounty
+### User Submits Bounty
 A user may submit a bounty for some work to be done. They may set an name, a sort description, and an amount. The bounty name, amount, and description is then saved to ipfs. The bounty and the amount is then also saved on the blockchain, and the bounty amount is escrowed from the submitter account.
 
-## User Lists Bounties
+### User Lists Bounties
 Bounties are public information.
 
-## User Adds Submission to Bounty
+### User Adds Submission to Bounty
 Any user can add submissions to bounties as long as they do not
 
 
@@ -15,7 +15,7 @@ Any user can add submissions to bounties as long as they do not
 * We assume that you have truffle ganache, and ipfs already installed.
 * This will not use Metamask for web3 but will inject its own, if you wish to use metamask you need to change src/application.js
 
-## Dependencies
+### Dependencies
 ```
 $ npm install
 $ truffle compile
@@ -26,7 +26,7 @@ $ ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http://local
 ```
 
 
-## Running
+### Running
 ```
 # run in separate terminals:
 ipfs daemon
@@ -35,7 +35,7 @@ truffle migrate && npm start
 ```
 Then navigate to [localhost:3000](http://localhost:3000).
 
-## Testing
+### Testing
 Tests have been developed to test the happy case (create bounty -> create submission -> approve submission), as well as different boundary conditions and failure scenarios, including:
 * Trying to create a bounty with an already existing id
 * Trying to create a bounty when contract is paused.
@@ -52,12 +52,12 @@ Tests have been developed to test the happy case (create bounty -> create submis
 truffle test
 ```
 
-## Design Patterns
+### Design Patterns
 See [design_pattern_decisions.md](design_pattern_decisions.md) for an explanation of design patterns used.
 
-## Security Tools / Common Attacks
+### Security Tools / Common Attacks
 See [avoiding_common_attacks.md](avoiding_common_attacks.md) for an explanation of common attacks and how they were avoided.
 
 
-## Stretch Requirements Fulfilled
+### Stretch Requirements Fulfilled
 * Used IPFS

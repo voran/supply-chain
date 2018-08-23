@@ -23,8 +23,8 @@ contract Bounty is Mortal, CircuitBreaker, EIP20(1000000 * 10**uint(18), "Bounty
   bytes32[] public bountyIds;
   bytes32[] public submissionIds;
 
-  mapping (bytes32 => Bounty) public bounties;
-  mapping (bytes32 => Submission) public submissions;
+  mapping (bytes32 => Bounty) private bounties;
+  mapping (bytes32 => Submission) private submissions;
 
   event CreateBounty(bytes32 bountyId, address owner, uint amount);
   event CreateSubmission(bytes32 submissionId, bytes32 bountyId, address owner);
@@ -40,7 +40,7 @@ contract Bounty is Mortal, CircuitBreaker, EIP20(1000000 * 10**uint(18), "Bounty
   * @param bountyId bounty id.
   * @param amount bounty amount.
   */
-  function createBounty(bytes32 bountyId, uint amount) public nonZero(amount) stoppedInEmergency {
+  function createBounty(bytes32 bountyId, uint amount) external nonZero(amount) stoppedInEmergency {
     // bounty should not exist
     require(bounties[bountyId].owner == 0x0);
 
@@ -56,7 +56,7 @@ contract Bounty is Mortal, CircuitBreaker, EIP20(1000000 * 10**uint(18), "Bounty
   * @param bountyId id of bounty.
   * @param submissionId id of submission.
   */
-  function createSubmission(bytes32 bountyId, bytes32 submissionId) stoppedInEmergency public {
+  function createSubmission(bytes32 bountyId, bytes32 submissionId) stoppedInEmergency external {
     // bounty should exist
     require(bounties[bountyId].owner != 0x0);
 
@@ -78,14 +78,14 @@ contract Bounty is Mortal, CircuitBreaker, EIP20(1000000 * 10**uint(18), "Bounty
   /** @dev Lists all bounties.
   * @return list of bounty ids.
   */
-  function listBounties() public view returns (bytes32[]) {
+  function listBounties() external view returns (bytes32[]) {
     return bountyIds;
   }
 
   /** @dev Lists all submissions for a given bounty.
   * @return list of submission ids.
   */
-  function listBountySubmissions(bytes32 bountyId) public view returns (bytes32[]) {
+  function listBountySubmissions(bytes32 bountyId) external view returns (bytes32[]) {
     return bounties[bountyId].submissionIds;
   }
 
@@ -93,14 +93,14 @@ contract Bounty is Mortal, CircuitBreaker, EIP20(1000000 * 10**uint(18), "Bounty
   * @param bountyId id of bounty.
   * @return submission id.
   */
-  function getBountyAcceptedSubmission(bytes32 bountyId) public view returns (bytes32) {
+  function getBountyAcceptedSubmission(bytes32 bountyId) external view returns (bytes32) {
     return bounties[bountyId].acceptedSubmissionId;
   }
 
   /** @dev Accepts a given submission, releasing the escrowed bounty amount to the bounty owner.
   * @param submissionId id of submission.
   */
-  function acceptSubmission(bytes32 submissionId) public
+  function acceptSubmission(bytes32 submissionId) external
     bountyOwner(submissionId)
     noAcceptedSubmission(submissionId)
     nonRejectedSubmission(submissionId)
@@ -114,7 +114,7 @@ contract Bounty is Mortal, CircuitBreaker, EIP20(1000000 * 10**uint(18), "Bounty
   /** @dev Rejects a given submission.
   * @param submissionId id of submission.
   */
-  function rejectSubmission(bytes32 submissionId) public
+  function rejectSubmission(bytes32 submissionId) external
     bountyOwner(submissionId)
     noAcceptedSubmission(submissionId)
     nonRejectedSubmission(submissionId)
