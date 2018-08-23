@@ -54,6 +54,20 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     assert.equal(err.message, revertMessage);
   });
 
+  it('does not create bounty on emergency stop', async () => {
+    const bountyAmount = 3;
+    await bounty.stopContract({from: owner});
+    let err;
+    try {
+      await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
   it('does not create bounty if same id exists', async () => {
     const bountyAmount = 10;
     await bounty.createBounty(bountyId, bountyAmount, {from: alice});
@@ -98,6 +112,21 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     const bountyAmount = 2;
     await bounty.createBounty(bountyId, bountyAmount, {from: alice});
     await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
+    let err;
+    try {
+      await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
+  it('does not create submission on emergency stop', async () => {
+    const bountyAmount = 2;
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    await bounty.stopContract({from: owner});
     let err;
     try {
       await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
@@ -159,11 +188,45 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     assert.equal(err.message, revertMessage);
   });
 
+  it('does not accept submission on emergency stop', async () => {
+    const bountyAmount = 3;
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
+    await bounty.stopContract({from: owner});
+
+    let err;
+    try {
+      await bounty.acceptSubmission(bobSubmissionId, {from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
   it('does not reject submission when already accepted', async () => {
     const bountyAmount = 3;
     await bounty.createBounty(bountyId, bountyAmount, {from: alice});
     await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
     await bounty.acceptSubmission(bobSubmissionId, {from: alice});
+
+    let err;
+    try {
+      await bounty.rejectSubmission(bobSubmissionId, {from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
+  it('does not reject submission on emergency stop', async () => {
+    const bountyAmount = 3;
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
+    await bounty.stopContract({from: owner});
 
     let err;
     try {
@@ -245,5 +308,36 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
   it('lists submissions when none', async () => {
     const response = await bounty.listBounties.call({from: alice});
     assert.equal(response.length, 0);
+  });
+
+  it('does not stop contract when not contract owner', async () => {
+    let err;
+    try {
+      await bounty.stopContract({from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
+  it('does not resume contract when not contract owner', async () => {
+    let err;
+    try {
+      await bounty.stopContract({from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
+  it('resumes contract when contract owner', async () => {
+    const bountyAmount = 3;
+    await bounty.stopContract({from: owner});
+    await bounty.resumeContract({from: owner});
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
   });
 });

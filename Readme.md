@@ -33,11 +33,15 @@ Then navigate to [localhost:3000](http://localhost:3000).
 ## Testing
 Tests have been developed to test the happy case (create bounty -> create submission -> approve submission), as well as different boundary conditions and failure scenarios, including:
 * Trying to create a bounty with an already existing id
+* Trying to create a bounty when contract is paused.
 * Trying to create a submission for an already existing submission
 * Trying to create a submission for a non-existent bounty.
+* Trying to create a submission when contract is paused.
 * Trying to accept/reject a submission for a bounty you don't own.
 * Trying to accept/reject a submission which is already accepted/rejected.
 * Trying to accept/reject a submission when the bounty already has an accepted submission.
+* Trying to accept/reject a submission when contract is paused.
+* Trying to emergency stop/resume contract when not contract owner.
 
 ```
 truffle test
@@ -45,8 +49,13 @@ truffle test
 
 ## TODO
 ### Design Patterns
-* Implement Emergency Stop
-* A document called design_pattern_desicions.md that explains why you chose to use the design patterns that you did.
+#### Emergency Stop
+The emergency stop pattern is used to enable the contract owner stop any state changes in case a
+vulnerability in the contract is discovered.
+
+### Others
+See design_pattern_decisions.md
+
 
 
 

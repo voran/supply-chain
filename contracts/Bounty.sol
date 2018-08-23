@@ -4,6 +4,8 @@ import "tokens/contracts/eip20/EIP20.sol";
 
 /** @title Bounty contractr. */
 contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
+  address public owner = msg.sender;
+  bool isStopped = false;
 
   struct Bounty {
     address owner;
@@ -33,12 +35,14 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   modifier bountyOwner(bytes32 _submissionId) { require(bounties[submissions[_submissionId].bountyId].owner == msg.sender); _;}
   modifier noAcceptedSubmission(bytes32 _submissionId) { require(bounties[submissions[_submissionId].bountyId].acceptedSubmissionId == 0x0); _;}
   modifier nonRejectedSubmission(bytes32 _submissionId) { require(submissions[_submissionId].rejected == false); _;}
+  modifier contractOwner { require(owner == msg.sender); _;}
+  modifier stoppedInEmergency { require(!isStopped); _; }
 
   /** @dev Creates a bounty and escrows bounty amount from contract.
   * @param bountyId bounty id.
   * @param amount bounty amount.
   */
-  function createBounty(bytes32 bountyId, uint amount) public nonZero(amount) {
+  function createBounty(bytes32 bountyId, uint amount) public nonZero(amount) stoppedInEmergency {
     // bounty should not exist
     require(bounties[bountyId].owner == 0x0);
 
@@ -54,7 +58,7 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   * @param bountyId id of bounty.
   * @param submissionId id of submission.
   */
-  function createSubmission(bytes32 bountyId, bytes32 submissionId) public {
+  function createSubmission(bytes32 bountyId, bytes32 submissionId) stoppedInEmergency public {
     // bounty should exist
     require(bounties[bountyId].owner != 0x0);
 
@@ -98,7 +102,8 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   function acceptSubmission(bytes32 submissionId) public
     bountyOwner(submissionId)
     noAcceptedSubmission(submissionId)
-    nonRejectedSubmission(submissionId) {
+    nonRejectedSubmission(submissionId)
+    stoppedInEmergency {
 
     bounties[submissions[submissionId].bountyId].acceptedSubmissionId = submissionId;
     this.transfer(submissions[submissionId].owner, bounties[submissions[submissionId].bountyId].amount);
@@ -111,9 +116,19 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   function rejectSubmission(bytes32 submissionId) public
     bountyOwner(submissionId)
     noAcceptedSubmission(submissionId)
-    nonRejectedSubmission(submissionId) {
+    nonRejectedSubmission(submissionId)
+    stoppedInEmergency {
 
     submissions[submissionId].rejected = true;
     emit RejectSubmission(submissionId);
   }
+
+  function stopContract() public contractOwner {
+    isStopped = true;
+  }
+
+  function resumeContract() public contractOwner {
+    isStopped = false;
+  }
+
 }
