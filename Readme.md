@@ -18,6 +18,7 @@ Any user can add submissions to bounties as long as they do not
 ### Dependencies
 ```
 $ npm install
+$ truffle install
 $ truffle compile
 
 $ ipfs init
