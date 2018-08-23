@@ -47,16 +47,10 @@ Tests have been developed to test the happy case (create bounty -> create submis
 truffle test
 ```
 
-## TODO
 ### Design Patterns
-#### Emergency Stop
-The emergency stop pattern is used to enable the contract owner stop any state changes in case a
-vulnerability in the contract is discovered.
+See [design_pattern_decisions.md](design_pattern_decisions.md) for an explanation of design patterns used.
 
-### Others
-See design_pattern_decisions.md
-
-
+## TODO
 
 
 ### Security Tools / Common Attacks

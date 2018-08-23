@@ -1,11 +1,11 @@
 pragma solidity ^0.4.23;
 
 import "tokens/contracts/eip20/EIP20.sol";
+import "./CircuitBreaker.sol";
+import "./Mortal.sol";
 
 /** @title Bounty contractr. */
-contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
-  address public owner = msg.sender;
-  bool isStopped = false;
+contract Bounty is Mortal, CircuitBreaker, EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY")  {
 
   struct Bounty {
     address owner;
@@ -35,8 +35,6 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
   modifier bountyOwner(bytes32 _submissionId) { require(bounties[submissions[_submissionId].bountyId].owner == msg.sender); _;}
   modifier noAcceptedSubmission(bytes32 _submissionId) { require(bounties[submissions[_submissionId].bountyId].acceptedSubmissionId == 0x0); _;}
   modifier nonRejectedSubmission(bytes32 _submissionId) { require(submissions[_submissionId].rejected == false); _;}
-  modifier contractOwner { require(owner == msg.sender); _;}
-  modifier stoppedInEmergency { require(!isStopped); _; }
 
   /** @dev Creates a bounty and escrows bounty amount from contract.
   * @param bountyId bounty id.
@@ -122,13 +120,4 @@ contract Bounty is EIP20(1000000 * 10**uint(18), "Bounty Token", 18, "BTY") {
     submissions[submissionId].rejected = true;
     emit RejectSubmission(submissionId);
   }
-
-  function stopContract() public contractOwner {
-    isStopped = true;
-  }
-
-  function resumeContract() public contractOwner {
-    isStopped = false;
-  }
-
 }

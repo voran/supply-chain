@@ -340,4 +340,20 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     await bounty.resumeContract({from: owner});
     await bounty.createBounty(bountyId, bountyAmount, {from: alice});
   });
+
+  it('does not self-descruct when not owner', async () => {
+    let err;
+    try {
+      await bounty.kill({from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
+  it('self-descructs when owner', async () => {
+    await bounty.kill({from: owner});
+  });
 });
