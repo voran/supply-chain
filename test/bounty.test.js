@@ -123,6 +123,22 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     assert.equal(err.message, revertMessage);
   });
 
+  it('does not create submission if bounty has accepted submission', async () => {
+    const bountyAmount = 2;
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    await bounty.createSubmission(bountyId, charlieSubmissionId, {from: charlie});
+    await bounty.acceptSubmission(charlieSubmissionId, {from: alice});
+    let err;
+    try {
+      await bounty.createSubmission(bountyId, bobSubmissionId, {from: bob});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
   it('does not create submission on emergency stop', async () => {
     const bountyAmount = 2;
     await bounty.createBounty(bountyId, bountyAmount, {from: alice});

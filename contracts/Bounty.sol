@@ -63,6 +63,9 @@ contract Bounty is Mortal, CircuitBreaker, EIP20(1000000 * 10**uint(18), "Bounty
     // submission should not exist
     require(submissions[submissionId].owner == 0x0);
 
+    // bounty should not have an accepted submission
+    require(bounties[bountyId].acceptedSubmissionId == 0x0);
+
     submissionIds.push(submissionId);
     submissions[submissionId].owner = msg.sender;
     submissions[submissionId].bountyId = bountyId;

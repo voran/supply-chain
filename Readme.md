@@ -5,7 +5,12 @@ This system is a distributed app for a bounty system. It uses IPFS for file/meta
 A user may submit a bounty for some work to be done. They may set an name, a sort description, and an amount. The bounty name, amount, and description is then saved to ipfs. The bounty and the amount is then also saved on the blockchain, and the bounty amount is escrowed from the submitter account.
 
 ## User Lists Bounties
-A user may
+Bounties are public information.
+
+## User Adds Submission to Bounty
+Any user can add submissions to bounties as long as they do not
+
+
 # Set Up
 * We assume that you have truffle ganache, and ipfs already installed.
 * This will not use Metamask for web3 but will inject its own, if you wish to use metamask you need to change src/application.js
@@ -37,24 +42,21 @@ Tests have been developed to test the happy case (create bounty -> create submis
 * Trying to create a submission for an already existing submission
 * Trying to create a submission for a non-existent bounty.
 * Trying to create a submission when contract is paused.
+* Trying to create a submission for a bounty which already has an accepted submission.
 * Trying to accept/reject a submission for a bounty you don't own.
 * Trying to accept/reject a submission which is already accepted/rejected.
 * Trying to accept/reject a submission when the bounty already has an accepted submission.
 * Trying to accept/reject a submission when contract is paused.
 * Trying to emergency stop/resume contract when not contract owner.
-
 ```
 truffle test
 ```
 
-### Design Patterns
+## Design Patterns
 See [design_pattern_decisions.md](design_pattern_decisions.md) for an explanation of design patterns used.
 
-## TODO
-
-
-### Security Tools / Common Attacks
-* A document called avoiding_common_attacks.md that explains what measures you took to ensure that your contracts are not susceptible to common attacks. (Module 9 Lesson 3)
+## Security Tools / Common Attacks
+See [avoiding_common_attacks.md](avoiding_common_attacks.md) for an explanation of common attacks and how they were avoided.
 
 
 ## Stretch Requirements Fulfilled
