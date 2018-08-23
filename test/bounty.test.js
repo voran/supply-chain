@@ -54,6 +54,34 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     assert.equal(err.message, revertMessage);
   });
 
+  it('does not create bounty on default id', async () => {
+    const bountyAmount = 11;
+
+    let err;
+    try {
+      await bounty.createBounty('0x0', bountyAmount, {from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
+  it('does not create bounty on negative amount', async () => {
+    const bountyAmount = -1;
+
+    let err;
+    try {
+      await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
   it('does not create bounty on emergency stop', async () => {
     const bountyAmount = 3;
     await bounty.stopContract({from: owner});
@@ -123,6 +151,32 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     assert.equal(err.message, revertMessage);
   });
 
+  it('does not create submission with default bounty id', async () => {
+    let err;
+    try {
+      await bounty.createSubmission('0x0', bobSubmissionId, {from: bob});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
+  it('does not create submission with default submission id', async () => {
+    const bountyAmount = 2;
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+    let err;
+    try {
+      await bounty.createSubmission(bountyId, '0x0', {from: bob});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
   it('does not create submission if bounty has accepted submission', async () => {
     const bountyAmount = 2;
     await bounty.createBounty(bountyId, bountyAmount, {from: alice});
@@ -162,6 +216,21 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     let err;
     try {
       await bounty.acceptSubmission(bobSubmissionId, {from: bob});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
+  it('does not accept submission for default id', async () => {
+    const bountyAmount = 3;
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+
+    let err;
+    try {
+      await bounty.acceptSubmission('0x0', {from: alice});
     } catch (error) {
       err = error;
     }
@@ -230,6 +299,21 @@ contract('Bounty', ([owner, alice, bob, charlie]) => {
     let err;
     try {
       await bounty.rejectSubmission(bobSubmissionId, {from: alice});
+    } catch (error) {
+      err = error;
+    }
+
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, revertMessage);
+  });
+
+  it('does not accept submission for default id', async () => {
+    const bountyAmount = 3;
+    await bounty.createBounty(bountyId, bountyAmount, {from: alice});
+
+    let err;
+    try {
+      await bounty.rejectSubmission('0x0', {from: alice});
     } catch (error) {
       err = error;
     }

@@ -31,7 +31,8 @@ contract Bounty is Mortal, CircuitBreaker, EIP20(1000000 * 10**uint(18), "Bounty
   event AcceptSubmission(bytes32 submissionId);
   event RejectSubmission(bytes32 submissionId);
 
-  modifier nonZero(uint amount) { require(amount > 0); _;}
+  modifier positive(uint amount) { require(amount > 0); _;}
+  modifier nonDefaultValue(bytes32 id) { require(id != 0x0); _;}
   modifier bountyOwner(bytes32 _submissionId) { require(bounties[submissions[_submissionId].bountyId].owner == msg.sender); _;}
   modifier noAcceptedSubmission(bytes32 _submissionId) { require(bounties[submissions[_submissionId].bountyId].acceptedSubmissionId == 0x0); _;}
   modifier nonRejectedSubmission(bytes32 _submissionId) { require(submissions[_submissionId].rejected == false); _;}
@@ -40,7 +41,7 @@ contract Bounty is Mortal, CircuitBreaker, EIP20(1000000 * 10**uint(18), "Bounty
   * @param bountyId bounty id.
   * @param amount bounty amount.
   */
-  function createBounty(bytes32 bountyId, uint amount) external nonZero(amount) stoppedInEmergency {
+  function createBounty(bytes32 bountyId, uint amount) external nonDefaultValue(bountyId) positive(amount) stoppedInEmergency {
     // bounty should not exist
     require(bounties[bountyId].owner == 0x0);
 
@@ -56,8 +57,14 @@ contract Bounty is Mortal, CircuitBreaker, EIP20(1000000 * 10**uint(18), "Bounty
   * @param bountyId id of bounty.
   * @param submissionId id of submission.
   */
-  function createSubmission(bytes32 bountyId, bytes32 submissionId) stoppedInEmergency external {
+  function createSubmission(bytes32 bountyId, bytes32 submissionId)
+    nonDefaultValue(bountyId)
+    nonDefaultValue(submissionId)
+    stoppedInEmergency external {
+
     // bounty should exist
+    require(bounties[bountyId].owner != 0x0);
+
     require(bounties[bountyId].owner != 0x0);
 
     // submission should not exist
@@ -101,6 +108,7 @@ contract Bounty is Mortal, CircuitBreaker, EIP20(1000000 * 10**uint(18), "Bounty
   * @param submissionId id of submission.
   */
   function acceptSubmission(bytes32 submissionId) external
+    nonDefaultValue(submissionId)
     bountyOwner(submissionId)
     noAcceptedSubmission(submissionId)
     nonRejectedSubmission(submissionId)
@@ -115,6 +123,7 @@ contract Bounty is Mortal, CircuitBreaker, EIP20(1000000 * 10**uint(18), "Bounty
   * @param submissionId id of submission.
   */
   function rejectSubmission(bytes32 submissionId) external
+    nonDefaultValue(submissionId)
     bountyOwner(submissionId)
     noAcceptedSubmission(submissionId)
     nonRejectedSubmission(submissionId)
